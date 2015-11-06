@@ -1,0 +1,37 @@
+#! C:/Program Files/Nuke8.0v5/nuke-8.0.v5.dll -nx
+version 8.0 v5
+Gizmo {
+inputs 2
+tile_color 0xe89900ff
+addUserKnob {20 convertTrack l "convert tracking"}
+addUserKnob {22 convExpression l "   convert(expression)   " T "camera = nuke.thisNode().input(0).name()\ntarget = nuke.thisNode().input(1).name()\n\nnuke.root().begin()\n\nAxs = nuke.createNode(\"Axis\")\nAxs\['useMatrix'].setValue( True )\nAxs\['label'].setValue(\"Converted\\nThis is moving.\")\n\nAxs.setInput(0, None)\n\nfor i in range(0,16):\n    Axs\['matrix'].setExpression(\"\[python \{getMtr(nuke.toNode('%s'), nuke.toNode('%s'))\[%d]\}]\" % (camera, target, i),i)\n\n\n\ncam = nuke.createNode(\"Camera\")\ncam.setName(\"Cam_Static\")\ncam\['focal'].setExpression(\"%s.focal\" % camera)\ncam\['haperture'].setExpression(\"%s.haperture\" % camera)\ncam\['vaperture'].setExpression(\"%s.vaperture\" % camera)\ncam\['label'].setValue(\"Converted\\nThis is static.\")\n\ncam.setInput(0, None)" +STARTLINE}
+addUserKnob {22 convBake l "convert(bake animation)" -STARTLINE T "camera = nuke.thisNode().input(0).name()\ntarget = nuke.thisNode().input(1).name()\n\nnuke.root().begin()\n\nAxs = nuke.createNode(\"Axis\")\nAxs\['useMatrix'].setValue( True )\nAxs\['label'].setValue(\"Converted\\nThis is moving.\\nBakedAnimation\")\n\nAxs.setInput(0, None)\n\nfor i in range(0,16):\n    Axs\['matrix'].setExpression(\"\[python \{getMtr(nuke.toNode('%s'), nuke.toNode('%s'))\[%d]\}]\" % (camera, target, i),i)\n\ncam = nuke.createNode(\"Camera\")\ncam.setName(\"Cam_Static\")\ncam\['focal'].setExpression(\"%s.focal\" % camera)\ncam\['haperture'].setExpression(\"%s.haperture\" % camera)\ncam\['vaperture'].setExpression(\"%s.vaperture\" % camera)\ncam\['label'].setValue(\"Converted\\nThis is static.\")\n\ncam.setInput(0, None)\n\n\ndef bakeA(node, start, last):\n    start = str(start)\n    last = str(last)\n    for i in range(0,16):\n        cmdA = node.name() + \".matrix.\" + str(i)\n        cmdC = \"matrix.\" + str(i)\n        nuke.animation(cmdA, \"generate\", (start, last, \"1\", \"y\", cmdC))\n    \ndef bakeB(node, knob, start, last):\n    start = str(start)\n    last = str(last)\n    cmdA = node.name() + \".\" + knob\n    cmdC = knob\n    nuke.animation(cmdA, \"generate\", (start, last, \"1\", \"y\", cmdC))   \n\nbakeA(Axs, int(nuke.root()\['first_frame'].value()), int(nuke.root()\['last_frame'].value()))\nbakeB(cam, \"focal\", int(nuke.root()\['first_frame'].value()), int(nuke.root()\['last_frame'].value()))\nbakeB(cam, \"haperture\", int(nuke.root()\['first_frame'].value()), int(nuke.root()\['last_frame'].value()))\nbakeB(cam, \"vaperture\", int(nuke.root()\['first_frame'].value()), int(nuke.root()\['last_frame'].value()))\n\n\n\n\n\n"}
+addUserKnob {20 Help}
+addUserKnob {3 function l INVISIBLE +INVISIBLE}
+function {{"\[python -execlocal global\\ getMtr\\n\\ndef\\ getMtr(camera,\\ target):\\n\\ \\ \\ \\ import\\ math\\n\\ \\ \\ \\ mR\\ =\\ nuke.math.Matrix4()\\n\\ \\ \\ \\ mC\\ =\\ nuke.math.Matrix4()\\n\\n\\ \\ \\ \\ for\\ i\\ in\\ range(0,16):\\n\\ \\ \\ \\ \\ \\ \\ \\ mR\\\[i\\]\\ =\\ float(nuke.tcl('value\\ '\\ +\\ target.name()\\ +\\ '.world_matrix.'\\ +\\ str(i)))\\n\\ \\ \\ \\ \\ \\ \\ \\ mC\\\[i\\]=\\ float(nuke.tcl('value\\ '\\ +\\ camera.name()\\ +\\ '.world_matrix.'\\ +\\ str(i)))\\n\\n\\ \\ \\ \\ return\\ mR\\ *\\ mC.inverse()\\n\\ \\ \\ \\ \\nret\\ =\\ 0]" i}}
+addUserKnob {26 "" +STARTLINE}
+addUserKnob {26 name l "" +STARTLINE T TrackingConverter_v1}
+addUserKnob {26 "" +STARTLINE}
+addUserKnob {26 coments l "" +STARTLINE T "NOTICE:\n\"Target\" input must always be an Axis node with final \"transform\".\nIt means \"Target\" must not have some kinds of \"TransformGeo\" node below itself.\n\nIf you open \"Curve Editor\", you feel it's slow when you press button.\nAnyhow \"Bake\" is slow. "}
+addUserKnob {26 "" +STARTLINE}
+addUserKnob {26 me l "" +STARTLINE T "by masahiro teraoka, 2014"}
+}
+Input {
+ inputs 0
+ name Camera
+ xpos -40
+ ypos -9
+}
+Output {
+ name Output1
+ xpos -40
+ ypos 303
+}
+Input {
+ inputs 0
+ name Target
+ xpos 70
+ ypos -9
+ number 1
+}
+end_group

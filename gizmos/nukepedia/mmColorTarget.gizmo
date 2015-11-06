@@ -1,0 +1,4596 @@
+#! C:/Program Files/Nuke7.0v10/Nuke7.0.exe -nx
+version 7.0 v10
+Gizmo {
+ inputs 2
+ help "Matches the colors of two input images using the MacBeth ColorChecker. Requires NumPy for the calculation."
+ tile_color 0xaa55ffff
+ note_font Verdana
+ note_font_color 0xedededff
+ addUserKnob {20 ColorTarget}
+ addUserKnob {4 currentView M {source target compare ""}}
+ addUserKnob {26 ""}
+ addUserKnob {20 srcGrp l Source n 1}
+ addUserKnob {7 srcSize l "Sample Size" R 0.001 100}
+ srcSize 20
+ addUserKnob {12 srcTL}
+ srcTL {5 450}
+ addUserKnob {12 srcTR -STARTLINE}
+ srcTR {310 450}
+ addUserKnob {12 srcBL}
+ srcBL {5 250}
+ addUserKnob {12 srcBR -STARTLINE}
+ srcBR {310 250}
+ addUserKnob {6 srcOverlay l "Color Overlay" +STARTLINE}
+ srcOverlay true
+ addUserKnob {20 endGroup n -1}
+ addUserKnob {26 ""}
+ addUserKnob {20 tgtGrp l Target n 1}
+ addUserKnob {7 tgtSize l "Sample Size" R 0.001 100}
+ tgtSize 20
+ addUserKnob {12 tgtTL}
+ tgtTL {450 450}
+ addUserKnob {12 tgtTR -STARTLINE}
+ tgtTR {750 450}
+ addUserKnob {12 tgtBL}
+ tgtBL {450 250}
+ addUserKnob {12 tgtBR -STARTLINE}
+ tgtBR {750 250}
+ addUserKnob {6 tgtOverlay l "Color Overlay" +STARTLINE}
+ tgtOverlay true
+ addUserKnob {20 endGroup_1 l endGroup n -1}
+ addUserKnob {26 ""}
+ addUserKnob {6 ignoreTarget l "Use Reference Values as Target" t "This will ignore the target input and use the reference sRGB values of the ColorChecker." -STARTLINE}
+ addUserKnob {26 ""}
+ addUserKnob {22 calcMatrix l "Calculate Matrix" T "import imp\n\nmCT = nuke.thisNode()\n\n\ntry:\n    imp.find_module('numpy')\n    numpyExists = True\n\nexcept ImportError:\n    numpyExists = False\n\nif not numpyExists:\n    nuke.message(\"This gizmo requires the Python module 'NumPy'. Please install it first and make sure Nuke can import it.\")\n\nelse:\n    import numpy as np\n\n\ndef checkSourceInput():\n    if not mCT.input(1):\n        nuke.message(\"source input not connected\")\n        return False\n    else:\n        return True\n        \ndef checkTargetInput():\n    if not mCT.input(0):\n        if not checkIgnoreTarget():\n            mCT.knob('ignoreTarget').setValue(1)\n            nuke.message(\"target input not connected, reference values will be used as target instead\")\n        \n        return False\n    else:\n        return True\n\ndef checkIgnoreTarget():\n    if mCT.knob('ignoreTarget').getValue():\n        return True\n    else:\n        return False\n        \ndef calcMatrix():\n    src = mCT.node('positionsSRC')\n    tgt = mCT.node('positionsTGT')\n\n    SRCpatches = \[]\n    TGTpatches = \[]\n    indexPatches = \[]\n    if mCT.knob('darkSkin').getValue():\n        SRCpatches.append(src\['p11src'].getValue())\n        TGTpatches.append(tgt\['p11tgt'].getValue())\n        indexPatches.append(0)\n    \n    if mCT.knob('lightSkin').getValue():\n        SRCpatches.append(src\['p12src'].getValue())\n        TGTpatches.append(tgt\['p12tgt'].getValue())\n        indexPatches.append(1)\n            \n    if mCT.knob('blueSky').getValue():\n        SRCpatches.append(src\['p13src'].getValue())\n        TGTpatches.append(tgt\['p13tgt'].getValue())\n        indexPatches.append(2)\n\n    if mCT.knob('foliage').getValue():\n        SRCpatches.append(src\['p14src'].getValue())\n        TGTpatches.append(tgt\['p14tgt'].getValue())\n        indexPatches.append(3)\n        \n    if mCT.knob('blueFlower').getValue():\n        SRCpatches.append(src\['p15src'].getValue())\n        TGTpatches.append(tgt\['p15tgt'].getValue())\n        indexPatches.append(4)   \n\n    if mCT.knob('bluishGreen').getValue():\n        SRCpatches.append(src\['p16src'].getValue())\n        TGTpatches.append(tgt\['p16tgt'].getValue())\n        indexPatches.append(5)   \n        \n    if mCT.knob('orange').getValue():\n        SRCpatches.append(src\['p21src'].getValue())\n        TGTpatches.append(tgt\['p21tgt'].getValue())\n        indexPatches.append(6) \n        \n    if mCT.knob('purplishBlue').getValue():\n        SRCpatches.append(src\['p22src'].getValue())\n        TGTpatches.append(tgt\['p22tgt'].getValue())\n        indexPatches.append(7)   \n        \n    if mCT.knob('moderateRed').getValue():\n        SRCpatches.append(src\['p23src'].getValue())\n        TGTpatches.append(tgt\['p23tgt'].getValue())\n        indexPatches.append(8)\n        \n    if mCT.knob('purple').getValue():\n        SRCpatches.append(src\['p24src'].getValue())\n        TGTpatches.append(tgt\['p24tgt'].getValue())\n        indexPatches.append(9)\n        \n    if mCT.knob('yellowGreen').getValue():\n        SRCpatches.append(src\['p25src'].getValue())\n        TGTpatches.append(tgt\['p25tgt'].getValue())\n        indexPatches.append(10)   \n        \n    if mCT.knob('orangeYellow').getValue():\n        SRCpatches.append(src\['p26src'].getValue())\n        TGTpatches.append(tgt\['p26tgt'].getValue())\n        indexPatches.append(11)   \n\n    if mCT.knob('blue').getValue():\n        SRCpatches.append(src\['p31src'].getValue())\n        TGTpatches.append(tgt\['p31tgt'].getValue())\n        indexPatches.append(12)\n        \n    if mCT.knob('green').getValue():\n        SRCpatches.append(src\['p32src'].getValue())\n        TGTpatches.append(tgt\['p32tgt'].getValue())\n        indexPatches.append(13)   \n        \n    if mCT.knob('red').getValue():\n        SRCpatches.append(src\['p33src'].getValue())\n        TGTpatches.append(tgt\['p33tgt'].getValue())\n        indexPatches.append(14)  \n        \n    if mCT.knob('yellow').getValue():\n        SRCpatches.append(src\['p34src'].getValue())\n        TGTpatches.append(tgt\['p34tgt'].getValue())\n        indexPatches.append(15)  \n        \n    if mCT.knob('magenta').getValue():\n        SRCpatches.append(src\['p35src'].getValue())\n        TGTpatches.append(tgt\['p35tgt'].getValue())\n        indexPatches.append(16) \n        \n    if mCT.knob('cyan').getValue():\n        SRCpatches.append(src\['p36src'].getValue())\n        TGTpatches.append(tgt\['p36tgt'].getValue())\n        indexPatches.append(17)\n        \n    if mCT.knob('white').getValue():\n        SRCpatches.append(src\['p41src'].getValue())\n        TGTpatches.append(tgt\['p41tgt'].getValue())\n        indexPatches.append(18) \n\n    if mCT.knob('neutral8').getValue():\n        SRCpatches.append(src\['p42src'].getValue())\n        TGTpatches.append(tgt\['p42tgt'].getValue())\n        indexPatches.append(19) \n        \n    if mCT.knob('neutral65').getValue():\n        SRCpatches.append(src\['p43src'].getValue())\n        TGTpatches.append(tgt\['p43tgt'].getValue())\n        indexPatches.append(20) \n        \n    if mCT.knob('neutral5').getValue():\n        SRCpatches.append(src\['p44src'].getValue())\n        TGTpatches.append(tgt\['p44tgt'].getValue())\n        indexPatches.append(21) \n        \n    if mCT.knob('neutral35').getValue():\n        SRCpatches.append(src\['p45src'].getValue())\n        TGTpatches.append(tgt\['p45tgt'].getValue())\n        indexPatches.append(22) \n        \n    if mCT.knob('black').getValue():\n        SRCpatches.append(src\['p46src'].getValue())\n        TGTpatches.append(tgt\['p46tgt'].getValue())\n        indexPatches.append(23) \n\n    SRCvals = np.array(SRCpatches)\n    if checkIgnoreTarget():\n        refVals = \[\n        \[ 0.171441,   0.0843762,  0.0578054 ],\n        \[ 0.539479,   0.304987,   0.223228  ],\n        \[ 0.122139,   0.194618,   0.337164  ],\n        \[ 0.0953075,  0.14996,    0.0561285 ],\n        \[ 0.234551,   0.215861,   0.439657  ],\n        \[ 0.135633,   0.508881,   0.401978  ],\n        \[ 0.672443,   0.208637,   0.0251869 ],\n        \[ 0.0802198,  0.104616,   0.381326  ],\n        \[ 0.533276,   0.102242,   0.124772  ],\n        \[ 0.111932,   0.0451862,  0.14996   ],\n        \[ 0.337164,   0.502886,   0.0512695 ],\n        \[ 0.745404,   0.366253,   0.0273209 ],\n        \[ 0.0395462,  0.0466651,  0.304987  ],\n        \[ 0.061246,   0.296138,   0.0666259 ],\n        \[ 0.42869,    0.0368894,  0.0451862 ],\n        \[ 0.799103,   0.571125,   0.0137021 ],\n        \[ 0.496933,   0.093059,   0.300544  ],\n        \[ 0.00242822, 0.234551,   0.3564    ],\n        \[ 0.896269,   0.896269,   0.887923  ],\n        \[ 0.57758,    0.57758,    0.57758   ],\n        \[ 0.351533,   0.351533,   0.351533  ],\n        \[ 0.194618,   0.194618,   0.191202  ],\n        \[ 0.0908417,  0.0908417,  0.0908417 ],\n        \[ 0.0343398,  0.0343398,  0.0343398 ]]\n        refValsFiltered = \[]\n        for index,value in enumerate(refVals):\n            if index in indexPatches:\n                refValsFiltered.append(value)\n        \n        TGTvals = np.array(refValsFiltered)\n    else:\n        TGTvals = np.array(TGTpatches)\n\n\n    output = np.linalg.lstsq(SRCvals, TGTvals)\n\n\n    line1 = list(output\[0]\[0])\n    line2 = list(output\[0]\[1])\n    line3 = list(output\[0]\[2])\n\n    newList = \[line1\[0], line2\[0], line3\[0], line1\[1], line2\[1], line3\[1], line1\[2], line2\[2], line3\[2]]\n    \n    return newList, len(indexPatches)\n    \n    \ndef createMatrix():\n    if not numpyExists:\n        pass\n    elif checkSourceInput() == False:\n        pass\n        \n    else:\n        Xpos = mCT.xpos()\n        Ypos = mCT.ypos()\n        if checkTargetInput():\n            if checkIgnoreTarget():\n                toNodeName = 'refVALUES'\n            else:\n                toNodeName = mCT.dependencies()\[0].name()\n            if len(mCT.dependencies()) == 2:\n                srcInput = mCT.dependencies()\[1]\n            else:\n                srcInput = mCT.dependencies()\[0]\n                \n\n        else:\n            srcInput = mCT.dependencies()\[0]\n            toNodeName = 'refVALUES'\n        fromNodeName = srcInput.name()\n        newList = calcMatrix()\[0]\n        numberOfPatches = str(calcMatrix()\[1])\n        \n        nuke.root().begin()\n        \n        Matrix = nuke.createNode('ColorMatrix')\n        \n        Matrix.knob('label').setValue('\{0\} to \{1\}\\n\{2\} patches'.format(fromNodeName, toNodeName, numberOfPatches))\n        Matrix.setXpos( Xpos - 140 )\n        Matrix.setYpos( Ypos - 80)\n        Matrix.setInput(0,srcInput)\n        mCT.setInput(1,Matrix)\n        Matrix\['matrix'].setValue(newList)\n    \ncreateMatrix()" +STARTLINE}
+ addUserKnob {26 ""}
+ addUserKnob {26 credits l "" +STARTLINE T "mmColorTarget  ||  by Marco Meyer  |   www.marcomeyer-vfx.de   |   2014"}
+ addUserKnob {20 patchesTab l Patches}
+ addUserKnob {26 usage l "" +STARTLINE T "uncheck selective patches to exclude them from the calculation."}
+ addUserKnob {26 ""}
+ addUserKnob {6 darkSkin l "dark skin" +STARTLINE}
+ darkSkin true
+ addUserKnob {6 lightSkin l "light skin" -STARTLINE}
+ lightSkin true
+ addUserKnob {6 blueSky l "blue sky" -STARTLINE}
+ blueSky true
+ addUserKnob {6 foliage -STARTLINE}
+ foliage true
+ addUserKnob {6 blueFlower l "blue flower" -STARTLINE}
+ blueFlower true
+ addUserKnob {6 bluishGreen l "bluish green" -STARTLINE}
+ bluishGreen true
+ addUserKnob {6 orange +STARTLINE}
+ orange true
+ addUserKnob {6 purplishBlue l "purplish blue" -STARTLINE}
+ purplishBlue true
+ addUserKnob {6 moderateRed l "moderate red" -STARTLINE}
+ moderateRed true
+ addUserKnob {6 purple -STARTLINE}
+ purple true
+ addUserKnob {6 yellowGreen l "yellow green" -STARTLINE}
+ yellowGreen true
+ addUserKnob {6 orangeYellow l "orange yellow" -STARTLINE}
+ orangeYellow true
+ addUserKnob {6 blue +STARTLINE}
+ blue true
+ addUserKnob {6 green -STARTLINE}
+ green true
+ addUserKnob {6 red -STARTLINE}
+ red true
+ addUserKnob {6 yellow -STARTLINE}
+ yellow true
+ addUserKnob {6 magenta -STARTLINE}
+ magenta true
+ addUserKnob {6 cyan -STARTLINE}
+ cyan true
+ addUserKnob {6 white +STARTLINE}
+ white true
+ addUserKnob {6 neutral8 l "neutral 8" -STARTLINE}
+ neutral8 true
+ addUserKnob {6 neutral65 l "neutral 6.5" -STARTLINE}
+ neutral65 true
+ addUserKnob {6 neutral5 l "neutral 5" -STARTLINE}
+ neutral5 true
+ addUserKnob {6 neutral35 l "neutral 3.5" -STARTLINE}
+ neutral35 true
+ addUserKnob {6 black -STARTLINE}
+ black true
+}
+ BackdropNode {
+  inputs 0
+  name BackdropNode3
+  label "CALCULATION\nSOURCE"
+  note_font_size 30
+  xpos -1820
+  ypos -63
+  bdwidth 270
+  bdheight 252
+ }
+ BackdropNode {
+  inputs 0
+  name BackdropNode1
+  label "CALCULATION\nTARGET"
+  note_font_size 30
+  xpos -144
+  ypos -70
+  bdwidth 270
+  bdheight 252
+ }
+ BackdropNode {
+  inputs 0
+  name BackdropNode2
+  tile_color 0xff9455ff
+  label TARGET
+  note_font "Verdana Bold Bold Bold Bold Bold Bold Bold Bold Bold Bold Bold Bold Bold Bold Bold Bold Bold Bold Bold Bold"
+  note_font_size 50
+  xpos -336
+  ypos -223
+  bdwidth 3575
+  bdheight 121
+ }
+ BackdropNode {
+  inputs 0
+  name BackdropNode4
+  tile_color 0xe2cb03ff
+  label SOURCE
+  note_font "Verdana Bold Bold Bold Bold Bold Bold Bold Bold Bold Bold Bold Bold Bold Bold Bold Bold Bold Bold Bold Bold"
+  note_font_size 50
+  xpos -5063
+  ypos -223
+  bdwidth 3535
+  bdheight 126
+ }
+ Input {
+  inputs 0
+  name target
+  xpos -460
+  ypos -494
+ }
+ Dot {
+  name Dot2
+  label "INPUT TGT"
+  note_font_size 40
+  xpos -426
+  ypos -326
+ }
+ Dot {
+  name Dot57
+  xpos -426
+  ypos 74
+ }
+set N186f1e20 [stack 0]
+ NoOp {
+  name positionsTGT
+  xpos -40
+  ypos 71
+  addUserKnob {20 User}
+  addUserKnob {7 samplerSize l "sampler size" R 0.01 100}
+  samplerSize {{parent.PinCorners_TGT.samplerSize}}
+  addUserKnob {12 topleft}
+  topleft {{parent.PinCorners_TGT.topleft} {parent.PinCorners_TGT.topleft}}
+  addUserKnob {12 topright}
+  topright {{parent.PinCorners_TGT.topright} {parent.PinCorners_TGT.topright}}
+  addUserKnob {12 bottomleft}
+  bottomleft {{parent.PinCorners_TGT.bottomleft} {parent.PinCorners_TGT.bottomleft}}
+  addUserKnob {12 bottomright}
+  bottomright {{parent.PinCorners_TGT.bottomright} {parent.PinCorners_TGT.bottomright}}
+  addUserKnob {26 ""}
+  addUserKnob {12 p11}
+  p11 {{(((topright.x*7+bottomright.x*1)/8-(sqrt(pow(((topleft.x-topright.x)*7+(bottomleft.x-bottomright.x)*1)/8,2))/12*11))*1+11*((topleft.x*7+bottomleft.x*1)/8+(sqrt(pow(((topleft.x-topright.x)*7+(bottomleft.x-bottomright.x)*1)/8,2))/12*1)))/12} {((((topleft.y*11+topright.y*1)/12-(sqrt(pow(((topleft.y-bottomleft.y)*11+(topright.y+bottomright.y)*1)/12,2))/8*1))*7+1*((bottomleft.y*11+bottomright.y*1)/12+(sqrt(pow(((topleft.y-bottomleft.y)*11+(topright.y+bottomright.y)*1)/12,2))/8*7))))/8}}
+  addUserKnob {18 p11tgt -STARTLINE}
+  p11tgt {{"\[sample knob red p11.x p11.y knob.samplerSize knob.samplerSize]"} {"\[sample knob green p11.x p11.y knob.samplerSize knob.samplerSize]"} {"\[sample knob blue p11.x p11.y knob.samplerSize knob.samplerSize]"}}
+  addUserKnob {6 p11tgt_panelDropped l "panel dropped state" -STARTLINE +HIDDEN}
+  addUserKnob {12 p12}
+  p12 {{(((topright.x*7+bottomright.x*1)/8-(sqrt(pow(((topleft.x-topright.x)*7+(bottomleft.x-bottomright.x)*1)/8,2))/12*9))*3+9*((topleft.x*7+bottomleft.x*1)/8+(sqrt(pow(((topleft.x-topright.x)*7+(bottomleft.x-bottomright.x)*1)/8,2))/12*3)))/12} {((((topleft.y*9+topright.y*3)/12-(sqrt(pow(((topleft.y-bottomleft.y)*9+(topright.y+bottomright.y)*3)/12,2))/8*1))*7+1*((bottomleft.y*9+bottomright.y*3)/12+(sqrt(pow(((topleft.y-bottomleft.y)*9+(topright.y+bottomright.y)*3)/12,2))/8*7))))/8}}
+  addUserKnob {18 p12tgt -STARTLINE}
+  p12tgt {{"\[sample knob red p12.x p12.y knob.samplerSize knob.samplerSize]"} {"\[sample knob green p12.x p12.y knob.samplerSize knob.samplerSize]"} {"\[sample knob blue p12.x p12.y knob.samplerSize knob.samplerSize]"}}
+  addUserKnob {6 p12tgt_panelDropped l "panel dropped state" -STARTLINE +HIDDEN}
+  addUserKnob {12 p13}
+  p13 {{(((topright.x*7+bottomright.x*1)/8-(sqrt(pow(((topleft.x-topright.x)*7+(bottomleft.x-bottomright.x)*1)/8,2))/12*7))*5+7*((topleft.x*7+bottomleft.x*1)/8+(sqrt(pow(((topleft.x-topright.x)*7+(bottomleft.x-bottomright.x)*1)/8,2))/12*5)))/12} {((((topleft.y*7+topright.y*5)/12-(sqrt(pow(((topleft.y-bottomleft.y)*7+(topright.y+bottomright.y)*5)/12,2))/8*1))*7+1*((bottomleft.y*7+bottomright.y*5)/12+(sqrt(pow(((topleft.y-bottomleft.y)*7+(topright.y+bottomright.y)*5)/12,2))/8*7))))/8}}
+  addUserKnob {18 p13tgt -STARTLINE}
+  p13tgt {{"\[sample knob red p13.x p13.y knob.samplerSize knob.samplerSize]"} {"\[sample knob green p13.x p13.y knob.samplerSize knob.samplerSize]"} {"\[sample knob blue p13.x p13.y knob.samplerSize knob.samplerSize]"}}
+  addUserKnob {6 p13tgt_panelDropped l "panel dropped state" -STARTLINE +HIDDEN}
+  addUserKnob {12 p14}
+  p14 {{(((topright.x*7+bottomright.x*1)/8-(sqrt(pow(((topleft.x-topright.x)*7+(bottomleft.x-bottomright.x)*1)/8,2))/12*5))*7+5*((topleft.x*7+bottomleft.x*1)/8+(sqrt(pow(((topleft.x-topright.x)*7+(bottomleft.x-bottomright.x)*1)/8,2))/12*7)))/12} {((((topleft.y*5+topright.y*7)/12-(sqrt(pow(((topleft.y-bottomleft.y)*5+(topright.y+bottomright.y)*7)/12,2))/8*1))*7+1*((bottomleft.y*5+bottomright.y*7)/12+(sqrt(pow(((topleft.y-bottomleft.y)*5+(topright.y+bottomright.y)*7)/12,2))/8*7))))/8}}
+  addUserKnob {18 p14tgt -STARTLINE}
+  p14tgt {{"\[sample knob red p14.x p14.y knob.samplerSize knob.samplerSize]"} {"\[sample knob green p14.x p14.y knob.samplerSize knob.samplerSize]"} {"\[sample knob blue p14.x p14.y knob.samplerSize knob.samplerSize]"}}
+  addUserKnob {6 p14tgt_panelDropped l "panel dropped state" -STARTLINE +HIDDEN}
+  addUserKnob {12 p15}
+  p15 {{(((topright.x*7+bottomright.x*1)/8-(sqrt(pow(((topleft.x-topright.x)*7+(bottomleft.x-bottomright.x)*1)/8,2))/12*3))*9+3*((topleft.x*7+bottomleft.x*1)/8+(sqrt(pow(((topleft.x-topright.x)*7+(bottomleft.x-bottomright.x)*1)/8,2))/12*9)))/12} {((((topleft.y*3+topright.y*9)/12-(sqrt(pow(((topleft.y-bottomleft.y)*3+(topright.y+bottomright.y)*9)/12,2))/8*1))*7+1*((bottomleft.y*3+bottomright.y*9)/12+(sqrt(pow(((topleft.y-bottomleft.y)*3+(topright.y+bottomright.y)*9)/12,2))/8*7))))/8}}
+  addUserKnob {18 p15tgt -STARTLINE}
+  p15tgt {{"\[sample knob red p15.x p15.y knob.samplerSize knob.samplerSize]"} {"\[sample knob green p15.x p15.y knob.samplerSize knob.samplerSize]"} {"\[sample knob blue p15.x p15.y knob.samplerSize knob.samplerSize]"}}
+  addUserKnob {6 p15tgt_panelDropped l "panel dropped state" -STARTLINE +HIDDEN}
+  addUserKnob {12 p16}
+  p16 {{(((topright.x*7+bottomright.x*1)/8-(sqrt(pow(((topleft.x-topright.x)*7+(bottomleft.x-bottomright.x)*1)/8,2))/12*1))*11+1*((topleft.x*7+bottomleft.x*1)/8+(sqrt(pow(((topleft.x-topright.x)*7+(bottomleft.x-bottomright.x)*1)/8,2))/12*11)))/12} {((((topleft.y*1+topright.y*11)/12-(sqrt(pow(((topleft.y-bottomleft.y)*1+(topright.y+bottomright.y)*11)/12,2))/8*1))*7+1*((bottomleft.y*1+bottomright.y*11)/12+(sqrt(pow(((topleft.y-bottomleft.y)*1+(topright.y+bottomright.y)*11)/12,2))/8*7))))/8}}
+  addUserKnob {18 p16tgt -STARTLINE}
+  p16tgt {{"\[sample knob red p16.x p16.y knob.samplerSize knob.samplerSize]"} {"\[sample knob green p16.x p16.y knob.samplerSize knob.samplerSize]"} {"\[sample knob blue p16.x p16.y knob.samplerSize knob.samplerSize]"}}
+  addUserKnob {6 p16tgt_panelDropped l "panel dropped state" -STARTLINE +HIDDEN}
+  addUserKnob {26 ""}
+  addUserKnob {12 p21}
+  p21 {{(((topright.x*5+bottomright.x*3)/8-(sqrt(pow(((topleft.x-topright.x)*5+(bottomleft.x-bottomright.x)*3)/8,2))/12*11))*1+11*((topleft.x*5+bottomleft.x*3)/8+(sqrt(pow(((topleft.x-topright.x)*5+(bottomleft.x-bottomright.x)*3)/8,2))/12*1)))/12} {((((topleft.y*11+topright.y*1)/12-(sqrt(pow(((topleft.y-bottomleft.y)*11+(topright.y+bottomright.y)*1)/12,2))/8*3))*5+3*((bottomleft.y*11+bottomright.y*1)/12+(sqrt(pow(((topleft.y-bottomleft.y)*11+(topright.y+bottomright.y)*1)/12,2))/8*5))))/8}}
+  addUserKnob {18 p21tgt -STARTLINE}
+  p21tgt {{"\[sample knob red p21.x p21.y knob.samplerSize knob.samplerSize]"} {"\[sample knob green p21.x p21.y knob.samplerSize knob.samplerSize]"} {"\[sample knob blue p21.x p21.y knob.samplerSize knob.samplerSize]"}}
+  addUserKnob {6 p21tgt_panelDropped l "panel dropped state" -STARTLINE +HIDDEN}
+  addUserKnob {12 p22}
+  p22 {{(((topright.x*5+bottomright.x*3)/8-(sqrt(pow(((topleft.x-topright.x)*5+(bottomleft.x-bottomright.x)*3)/8,2))/12*9))*3+9*((topleft.x*5+bottomleft.x*3)/8+(sqrt(pow(((topleft.x-topright.x)*5+(bottomleft.x-bottomright.x)*3)/8,2))/12*3)))/12} {((((topleft.y*9+topright.y*3)/12-(sqrt(pow(((topleft.y-bottomleft.y)*9+(topright.y+bottomright.y)*3)/12,2))/8*3))*5+3*((bottomleft.y*9+bottomright.y*3)/12+(sqrt(pow(((topleft.y-bottomleft.y)*9+(topright.y+bottomright.y)*3)/12,2))/8*5))))/8}}
+  addUserKnob {18 p22tgt -STARTLINE}
+  p22tgt {{"\[sample knob red p22.x p22.y knob.samplerSize knob.samplerSize]"} {"\[sample knob green p22.x p22.y knob.samplerSize knob.samplerSize]"} {"\[sample knob blue p22.x p22.y knob.samplerSize knob.samplerSize]"}}
+  addUserKnob {6 p22tgt_panelDropped l "panel dropped state" -STARTLINE +HIDDEN}
+  addUserKnob {12 p23}
+  p23 {{(((topright.x*5+bottomright.x*3)/8-(sqrt(pow(((topleft.x-topright.x)*5+(bottomleft.x-bottomright.x)*3)/8,2))/12*7))*5+7*((topleft.x*5+bottomleft.x*3)/8+(sqrt(pow(((topleft.x-topright.x)*5+(bottomleft.x-bottomright.x)*3)/8,2))/12*5)))/12} {((((topleft.y*7+topright.y*5)/12-(sqrt(pow(((topleft.y-bottomleft.y)*7+(topright.y+bottomright.y)*5)/12,2))/8*3))*5+3*((bottomleft.y*7+bottomright.y*5)/12+(sqrt(pow(((topleft.y-bottomleft.y)*7+(topright.y+bottomright.y)*5)/12,2))/8*5))))/8}}
+  addUserKnob {18 p23tgt -STARTLINE}
+  p23tgt {{"\[sample knob red p23.x p23.y knob.samplerSize knob.samplerSize]"} {"\[sample knob green p23.x p23.y knob.samplerSize knob.samplerSize]"} {"\[sample knob blue p23.x p23.y knob.samplerSize knob.samplerSize]"}}
+  addUserKnob {6 p23tgt_panelDropped l "panel dropped state" -STARTLINE +HIDDEN}
+  addUserKnob {12 p24}
+  p24 {{(((topright.x*5+bottomright.x*3)/8-(sqrt(pow(((topleft.x-topright.x)*5+(bottomleft.x-bottomright.x)*3)/8,2))/12*5))*7+5*((topleft.x*5+bottomleft.x*3)/8+(sqrt(pow(((topleft.x-topright.x)*5+(bottomleft.x-bottomright.x)*3)/8,2))/12*7)))/12} {((((topleft.y*5+topright.y*7)/12-(sqrt(pow(((topleft.y-bottomleft.y)*5+(topright.y+bottomright.y)*7)/12,2))/8*3))*5+3*((bottomleft.y*5+bottomright.y*7)/12+(sqrt(pow(((topleft.y-bottomleft.y)*5+(topright.y+bottomright.y)*7)/12,2))/8*5))))/8}}
+  addUserKnob {18 p24tgt -STARTLINE}
+  p24tgt {{"\[sample knob red p24.x p24.y knob.samplerSize knob.samplerSize]"} {"\[sample knob green p24.x p24.y knob.samplerSize knob.samplerSize]"} {"\[sample knob blue p24.x p24.y knob.samplerSize knob.samplerSize]"}}
+  addUserKnob {6 p24tgt_panelDropped l "panel dropped state" -STARTLINE +HIDDEN}
+  addUserKnob {12 p25}
+  p25 {{(((topright.x*5+bottomright.x*3)/8-(sqrt(pow(((topleft.x-topright.x)*5+(bottomleft.x-bottomright.x)*3)/8,2))/12*3))*9+3*((topleft.x*5+bottomleft.x*3)/8+(sqrt(pow(((topleft.x-topright.x)*5+(bottomleft.x-bottomright.x)*3)/8,2))/12*9)))/12} {((((topleft.y*3+topright.y*9)/12-(sqrt(pow(((topleft.y-bottomleft.y)*3+(topright.y+bottomright.y)*9)/12,2))/8*3))*5+3*((bottomleft.y*3+bottomright.y*9)/12+(sqrt(pow(((topleft.y-bottomleft.y)*3+(topright.y+bottomright.y)*9)/12,2))/8*5))))/8}}
+  addUserKnob {18 p25tgt -STARTLINE}
+  p25tgt {{"\[sample knob red p25.x p25.y knob.samplerSize knob.samplerSize]"} {"\[sample knob green p25.x p25.y knob.samplerSize knob.samplerSize]"} {"\[sample knob blue p25.x p25.y knob.samplerSize knob.samplerSize]"}}
+  addUserKnob {6 p25tgt_panelDropped l "panel dropped state" -STARTLINE +HIDDEN}
+  addUserKnob {12 p26}
+  p26 {{(((topright.x*5+bottomright.x*3)/8-(sqrt(pow(((topleft.x-topright.x)*5+(bottomleft.x-bottomright.x)*3)/8,2))/12*1))*11+1*((topleft.x*5+bottomleft.x*3)/8+(sqrt(pow(((topleft.x-topright.x)*5+(bottomleft.x-bottomright.x)*3)/8,2))/12*11)))/12} {((((topleft.y*1+topright.y*11)/12-(sqrt(pow(((topleft.y-bottomleft.y)*1+(topright.y+bottomright.y)*11)/12,2))/8*3))*5+3*((bottomleft.y*1+bottomright.y*11)/12+(sqrt(pow(((topleft.y-bottomleft.y)*1+(topright.y+bottomright.y)*11)/12,2))/8*5))))/8}}
+  addUserKnob {18 p26tgt -STARTLINE}
+  p26tgt {{"\[sample knob red p26.x p26.y knob.samplerSize knob.samplerSize]"} {"\[sample knob green p26.x p26.y knob.samplerSize knob.samplerSize]"} {"\[sample knob blue p26.x p26.y knob.samplerSize knob.samplerSize]"}}
+  addUserKnob {6 p26tgt_panelDropped l "panel dropped state" -STARTLINE +HIDDEN}
+  addUserKnob {26 ""}
+  addUserKnob {12 p31}
+  p31 {{(((topright.x*3+bottomright.x*5)/8-(sqrt(pow(((topleft.x-topright.x)*3+(bottomleft.x-bottomright.x)*5)/8,2))/12*11))*1+11*((topleft.x*3+bottomleft.x*5)/8+(sqrt(pow(((topleft.x-topright.x)*3+(bottomleft.x-bottomright.x)*5)/8,2))/12*1)))/12} {((((topleft.y*11+topright.y*1)/12-(sqrt(pow(((topleft.y-bottomleft.y)*11+(topright.y+bottomright.y)*1)/12,2))/8*5))*3+5*((bottomleft.y*11+bottomright.y*1)/12+(sqrt(pow(((topleft.y-bottomleft.y)*11+(topright.y+bottomright.y)*1)/12,2))/8*3))))/8}}
+  addUserKnob {18 p31tgt -STARTLINE}
+  p31tgt {{"\[sample knob red p31.x p31.y knob.samplerSize knob.samplerSize]"} {"\[sample knob green p31.x p31.y knob.samplerSize knob.samplerSize]"} {"\[sample knob blue p31.x p31.y knob.samplerSize knob.samplerSize]"}}
+  addUserKnob {6 p31tgt_panelDropped l "panel dropped state" -STARTLINE +HIDDEN}
+  addUserKnob {12 p32}
+  p32 {{(((topright.x*3+bottomright.x*5)/8-(sqrt(pow(((topleft.x-topright.x)*3+(bottomleft.x-bottomright.x)*5)/8,2))/12*9))*3+9*((topleft.x*3+bottomleft.x*5)/8+(sqrt(pow(((topleft.x-topright.x)*3+(bottomleft.x-bottomright.x)*5)/8,2))/12*3)))/12} {((((topleft.y*9+topright.y*3)/12-(sqrt(pow(((topleft.y-bottomleft.y)*9+(topright.y+bottomright.y)*3)/12,2))/8*5))*3+5*((bottomleft.y*9+bottomright.y*3)/12+(sqrt(pow(((topleft.y-bottomleft.y)*9+(topright.y+bottomright.y)*3)/12,2))/8*3))))/8}}
+  addUserKnob {18 p32tgt -STARTLINE}
+  p32tgt {{"\[sample knob red p32.x p32.y knob.samplerSize knob.samplerSize]"} {"\[sample knob green p32.x p32.y knob.samplerSize knob.samplerSize]"} {"\[sample knob blue p32.x p32.y knob.samplerSize knob.samplerSize]"}}
+  addUserKnob {6 p32tgt_panelDropped l "panel dropped state" -STARTLINE +HIDDEN}
+  addUserKnob {12 p33}
+  p33 {{(((topright.x*3+bottomright.x*5)/8-(sqrt(pow(((topleft.x-topright.x)*3+(bottomleft.x-bottomright.x)*5)/8,2))/12*7))*5+7*((topleft.x*3+bottomleft.x*5)/8+(sqrt(pow(((topleft.x-topright.x)*3+(bottomleft.x-bottomright.x)*5)/8,2))/12*5)))/12} {((((topleft.y*7+topright.y*5)/12-(sqrt(pow(((topleft.y-bottomleft.y)*7+(topright.y+bottomright.y)*5)/12,2))/8*5))*3+5*((bottomleft.y*7+bottomright.y*5)/12+(sqrt(pow(((topleft.y-bottomleft.y)*7+(topright.y+bottomright.y)*5)/12,2))/8*3))))/8}}
+  addUserKnob {18 p33tgt -STARTLINE}
+  p33tgt {{"\[sample knob red p33.x p33.y knob.samplerSize knob.samplerSize]"} {"\[sample knob green p33.x p33.y knob.samplerSize knob.samplerSize]"} {"\[sample knob blue p33.x p33.y knob.samplerSize knob.samplerSize]"}}
+  addUserKnob {6 p33tgt_panelDropped l "panel dropped state" -STARTLINE +HIDDEN}
+  addUserKnob {12 p34}
+  p34 {{(((topright.x*3+bottomright.x*5)/8-(sqrt(pow(((topleft.x-topright.x)*3+(bottomleft.x-bottomright.x)*5)/8,2))/12*5))*7+5*((topleft.x*3+bottomleft.x*5)/8+(sqrt(pow(((topleft.x-topright.x)*3+(bottomleft.x-bottomright.x)*5)/8,2))/12*7)))/12} {((((topleft.y*5+topright.y*7)/12-(sqrt(pow(((topleft.y-bottomleft.y)*5+(topright.y+bottomright.y)*7)/12,2))/8*5))*3+5*((bottomleft.y*5+bottomright.y*7)/12+(sqrt(pow(((topleft.y-bottomleft.y)*5+(topright.y+bottomright.y)*7)/12,2))/8*3))))/8}}
+  addUserKnob {18 p34tgt -STARTLINE}
+  p34tgt {{"\[sample knob red p34.x p34.y knob.samplerSize knob.samplerSize]"} {"\[sample knob green p34.x p34.y knob.samplerSize knob.samplerSize]"} {"\[sample knob blue p34.x p34.y knob.samplerSize knob.samplerSize]"}}
+  addUserKnob {6 p34tgt_panelDropped l "panel dropped state" -STARTLINE +HIDDEN}
+  addUserKnob {12 p35}
+  p35 {{(((topright.x*3+bottomright.x*5)/8-(sqrt(pow(((topleft.x-topright.x)*3+(bottomleft.x-bottomright.x)*5)/8,2))/12*3))*9+3*((topleft.x*3+bottomleft.x*5)/8+(sqrt(pow(((topleft.x-topright.x)*3+(bottomleft.x-bottomright.x)*5)/8,2))/12*9)))/12} {((((topleft.y*3+topright.y*9)/12-(sqrt(pow(((topleft.y-bottomleft.y)*3+(topright.y+bottomright.y)*9)/12,2))/8*5))*3+5*((bottomleft.y*3+bottomright.y*9)/12+(sqrt(pow(((topleft.y-bottomleft.y)*3+(topright.y+bottomright.y)*9)/12,2))/8*3))))/8}}
+  addUserKnob {18 p35tgt -STARTLINE}
+  p35tgt {{"\[sample knob red p35.x p35.y knob.samplerSize knob.samplerSize]"} {"\[sample knob green p35.x p35.y knob.samplerSize knob.samplerSize]"} {"\[sample knob blue p35.x p35.y knob.samplerSize knob.samplerSize]"}}
+  addUserKnob {6 p35tgt_panelDropped l "panel dropped state" -STARTLINE +HIDDEN}
+  addUserKnob {12 p36}
+  p36 {{(((topright.x*3+bottomright.x*5)/8-(sqrt(pow(((topleft.x-topright.x)*3+(bottomleft.x-bottomright.x)*5)/8,2))/12*1))*11+1*((topleft.x*3+bottomleft.x*5)/8+(sqrt(pow(((topleft.x-topright.x)*3+(bottomleft.x-bottomright.x)*5)/8,2))/12*11)))/12} {((((topleft.y*1+topright.y*11)/12-(sqrt(pow(((topleft.y-bottomleft.y)*1+(topright.y+bottomright.y)*11)/12,2))/8*5))*3+5*((bottomleft.y*1+bottomright.y*11)/12+(sqrt(pow(((topleft.y-bottomleft.y)*1+(topright.y+bottomright.y)*11)/12,2))/8*3))))/8}}
+  addUserKnob {18 p36tgt -STARTLINE}
+  p36tgt {{"\[sample knob red p36.x p36.y knob.samplerSize knob.samplerSize]"} {"\[sample knob green p36.x p36.y knob.samplerSize knob.samplerSize]"} {"\[sample knob blue p36.x p36.y knob.samplerSize knob.samplerSize]"}}
+  addUserKnob {6 p36tgt_panelDropped l "panel dropped state" -STARTLINE +HIDDEN}
+  addUserKnob {26 ""}
+  addUserKnob {12 p41}
+  p41 {{(((topright.x*1+bottomright.x*7)/8-(sqrt(pow(((topleft.x-topright.x)*1+(bottomleft.x-bottomright.x)*7)/8,2))/12*11))*1+11*((topleft.x*1+bottomleft.x*7)/8+(sqrt(pow(((topleft.x-topright.x)*1+(bottomleft.x-bottomright.x)*7)/8,2))/12*1)))/12} {((((topleft.y*11+topright.y*1)/12-(sqrt(pow(((topleft.y-bottomleft.y)*11+(topright.y+bottomright.y)*1)/12,2))/8*7))*1+7*((bottomleft.y*11+bottomright.y*1)/12+(sqrt(pow(((topleft.y-bottomleft.y)*11+(topright.y+bottomright.y)*1)/12,2))/8*1))))/8}}
+  addUserKnob {18 p41tgt -STARTLINE}
+  p41tgt {{"\[sample knob red p41.x p41.y knob.samplerSize knob.samplerSize]"} {"\[sample knob green p41.x p41.y knob.samplerSize knob.samplerSize]"} {"\[sample knob blue p41.x p41.y knob.samplerSize knob.samplerSize]"}}
+  addUserKnob {6 p41tgt_panelDropped l "panel dropped state" -STARTLINE +HIDDEN}
+  addUserKnob {12 p42}
+  p42 {{(((topright.x*1+bottomright.x*7)/8-(sqrt(pow(((topleft.x-topright.x)*1+(bottomleft.x-bottomright.x)*7)/8,2))/12*9))*3+9*((topleft.x*1+bottomleft.x*7)/8+(sqrt(pow(((topleft.x-topright.x)*1+(bottomleft.x-bottomright.x)*7)/8,2))/12*3)))/12} {((((topleft.y*9+topright.y*3)/12-(sqrt(pow(((topleft.y-bottomleft.y)*9+(topright.y+bottomright.y)*3)/12,2))/8*7))*1+7*((bottomleft.y*9+bottomright.y*3)/12+(sqrt(pow(((topleft.y-bottomleft.y)*9+(topright.y+bottomright.y)*3)/12,2))/8*1))))/8}}
+  addUserKnob {18 p42tgt -STARTLINE}
+  p42tgt {{"\[sample knob red p42.x p42.y knob.samplerSize knob.samplerSize]"} {"\[sample knob green p42.x p42.y knob.samplerSize knob.samplerSize]"} {"\[sample knob blue p42.x p42.y knob.samplerSize knob.samplerSize]"}}
+  addUserKnob {6 p42tgt_panelDropped l "panel dropped state" -STARTLINE +HIDDEN}
+  addUserKnob {12 p43}
+  p43 {{(((topright.x*1+bottomright.x*7)/8-(sqrt(pow(((topleft.x-topright.x)*1+(bottomleft.x-bottomright.x)*7)/8,2))/12*7))*5+7*((topleft.x*1+bottomleft.x*7)/8+(sqrt(pow(((topleft.x-topright.x)*1+(bottomleft.x-bottomright.x)*7)/8,2))/12*5)))/12} {((((topleft.y*7+topright.y*5)/12-(sqrt(pow(((topleft.y-bottomleft.y)*7+(topright.y+bottomright.y)*5)/12,2))/8*7))*1+7*((bottomleft.y*7+bottomright.y*5)/12+(sqrt(pow(((topleft.y-bottomleft.y)*7+(topright.y+bottomright.y)*5)/12,2))/8*1))))/8}}
+  addUserKnob {18 p43tgt -STARTLINE}
+  p43tgt {{"\[sample knob red p43.x p43.y knob.samplerSize knob.samplerSize]"} {"\[sample knob green p43.x p43.y knob.samplerSize knob.samplerSize]"} {"\[sample knob blue p43.x p43.y knob.samplerSize knob.samplerSize]"}}
+  addUserKnob {6 p43tgt_panelDropped l "panel dropped state" -STARTLINE +HIDDEN}
+  addUserKnob {12 p44}
+  p44 {{(((topright.x*1+bottomright.x*7)/8-(sqrt(pow(((topleft.x-topright.x)*1+(bottomleft.x-bottomright.x)*7)/8,2))/12*5))*7+5*((topleft.x*1+bottomleft.x*7)/8+(sqrt(pow(((topleft.x-topright.x)*1+(bottomleft.x-bottomright.x)*7)/8,2))/12*7)))/12} {((((topleft.y*5+topright.y*7)/12-(sqrt(pow(((topleft.y-bottomleft.y)*5+(topright.y+bottomright.y)*7)/12,2))/8*7))*1+7*((bottomleft.y*5+bottomright.y*7)/12+(sqrt(pow(((topleft.y-bottomleft.y)*5+(topright.y+bottomright.y)*7)/12,2))/8*1))))/8}}
+  addUserKnob {18 p44tgt -STARTLINE}
+  p44tgt {{"\[sample knob red p44.x p44.y knob.samplerSize knob.samplerSize]"} {"\[sample knob green p44.x p44.y knob.samplerSize knob.samplerSize]"} {"\[sample knob blue p44.x p44.y knob.samplerSize knob.samplerSize]"}}
+  addUserKnob {6 p44tgt_panelDropped l "panel dropped state" -STARTLINE +HIDDEN}
+  addUserKnob {12 p45}
+  p45 {{(((topright.x*1+bottomright.x*7)/8-(sqrt(pow(((topleft.x-topright.x)*1+(bottomleft.x-bottomright.x)*7)/8,2))/12*3))*9+3*((topleft.x*1+bottomleft.x*7)/8+(sqrt(pow(((topleft.x-topright.x)*1+(bottomleft.x-bottomright.x)*7)/8,2))/12*9)))/12} {((((topleft.y*3+topright.y*9)/12-(sqrt(pow(((topleft.y-bottomleft.y)*3+(topright.y+bottomright.y)*9)/12,2))/8*7))*1+7*((bottomleft.y*3+bottomright.y*9)/12+(sqrt(pow(((topleft.y-bottomleft.y)*3+(topright.y+bottomright.y)*9)/12,2))/8*1))))/8}}
+  addUserKnob {18 p45tgt -STARTLINE}
+  p45tgt {{"\[sample knob red p45.x p45.y knob.samplerSize knob.samplerSize]"} {"\[sample knob green p45.x p45.y knob.samplerSize knob.samplerSize]"} {"\[sample knob blue p45.x p45.y knob.samplerSize knob.samplerSize]"}}
+  addUserKnob {6 p45tgt_panelDropped l "panel dropped state" -STARTLINE +HIDDEN}
+  addUserKnob {12 p46}
+  p46 {{(((topright.x*1+bottomright.x*7)/8-(sqrt(pow(((topleft.x-topright.x)*1+(bottomleft.x-bottomright.x)*7)/8,2))/12*1))*11+1*((topleft.x*1+bottomleft.x*7)/8+(sqrt(pow(((topleft.x-topright.x)*1+(bottomleft.x-bottomright.x)*7)/8,2))/12*11)))/12} {((((topleft.y*1+topright.y*11)/12-(sqrt(pow(((topleft.y-bottomleft.y)*1+(topright.y+bottomright.y)*11)/12,2))/8*7))*1+7*((bottomleft.y*1+bottomright.y*11)/12+(sqrt(pow(((topleft.y-bottomleft.y)*1+(topright.y+bottomright.y)*11)/12,2))/8*1))))/8}}
+  addUserKnob {18 p46tgt -STARTLINE}
+  p46tgt {{"\[sample knob red p46.x p46.y knob.samplerSize knob.samplerSize]"} {"\[sample knob green p46.x p46.y knob.samplerSize knob.samplerSize]"} {"\[sample knob blue p46.x p46.y knob.samplerSize knob.samplerSize]"}}
+  addUserKnob {6 p46tgt_panelDropped l "panel dropped state" -STARTLINE +HIDDEN}
+ }
+ Reformat {
+  inputs 0
+  type "to box"
+  box_width 1023
+  box_height 688
+  box_fixed true
+  name Reformat3
+  xpos -880
+  ypos 791
+ }
+set N186f2500 [stack 0]
+ Roto {
+  output alpha
+  curves {{{v x3f99999a}
+  {f 0}
+  {n
+   {layer Root
+    {f 1024}
+    {t x44800000 x44428000}
+    {a}
+    {curvegroup Rectangle24 1536 bezier
+     {{cc
+       {f 8192}
+       {p
+        {0 xc1980000}
+        {x42380000 x44218000}
+        {x41980000}
+        {xc1980000}
+        {x42ce0000 x44218000}
+        {0 xc1980000}
+        {0 x41980000}
+        {x42ce0000 x44134000}
+        {xc1980000}
+        {x41980000}
+        {x42380000 x44134000}
+        {0 x41980000}}}
+      {cc
+       {f 8192}
+       {p
+        {0 xc1980000}
+        {}
+        {x41980000}
+        {xc1980000}
+        {}
+        {0 xc1980000}
+        {0 x41980000}
+        {}
+        {xc1980000}
+        {x41980000}
+        {}
+        {0 x41980000}}}}
+     {t x42950000 x441a6000
+   {{1 0}}  x41200000 xc404c000
+   {{1 0}}
+   {{1 0}}
+   {{1 0}}  0 1 1
+   {{1 1}}  0 0
+   {{1 0}}
+   {{1 0}}
+   {{1 0}}
+   {{1 0}}}
+     {a str 1 spx x44800000 spy x44428000 sb 1 tt x41100000}}
+    {curvegroup Rectangle23 1536 bezier
+     {{cc
+       {f 8192}
+       {p
+        {0 xc1980000}
+        {x42380000 x44218000}
+        {x41980000}
+        {xc1980000}
+        {x42ce0000 x44218000}
+        {0 xc1980000}
+        {0 x41980000}
+        {x42ce0000 x44134000}
+        {xc1980000}
+        {x41980000}
+        {x42380000 x44134000}
+        {0 x41980000}}}
+      {cc
+       {f 8192}
+       {p
+        {0 xc1980000}
+        {}
+        {x41980000}
+        {xc1980000}
+        {}
+        {0 xc1980000}
+        {0 x41980000}
+        {}
+        {xc1980000}
+        {x41980000}
+        {}
+        {0 x41980000}}}}
+     {t x42950000 x441a6000
+      {{1 0}}  x43340000 xc404c000
+      {{1 0}}
+      {{1 0}}
+      {{1 0}}     0 1 1
+      {{1 1}}     0 0
+      {{1 0}}
+      {{1 0}}
+      {{1 0}}
+      {{1 0}}}
+     {a str 1 spx x44800000 spy x44428000 sb 1 tt x41100000}}
+    {curvegroup Rectangle22 1536 bezier
+     {{cc
+       {f 8192}
+       {p
+        {0 xc1980000}
+        {x42380000 x44218000}
+        {x41980000}
+        {xc1980000}
+        {x42ce0000 x44218000}
+        {0 xc1980000}
+        {0 x41980000}
+        {x42ce0000 x44134000}
+        {xc1980000}
+        {x41980000}
+        {x42380000 x44134000}
+        {0 x41980000}}}
+      {cc
+       {f 8192}
+       {p
+        {0 xc1980000}
+        {}
+        {x41980000}
+        {xc1980000}
+        {}
+        {0 xc1980000}
+        {0 x41980000}
+        {}
+        {xc1980000}
+        {x41980000}
+        {}
+        {0 x41980000}}}}
+     {t x42950000 x441a6000
+      {{1 0}}  x43af0000 xc404c000
+      {{1 0}}
+      {{1 0}}
+      {{1 0}}     0 1 1
+      {{1 1}}     0 0
+      {{1 0}}
+      {{1 0}}
+      {{1 0}}
+      {{1 0}}}
+     {a str 1 spx x44800000 spy x44428000 sb 1 tt x41100000}}
+    {curvegroup Rectangle21 1536 bezier
+     {{cc
+       {f 8192}
+       {p
+        {0 xc1980000}
+        {x42380000 x44218000}
+        {x41980000}
+        {xc1980000}
+        {x42ce0000 x44218000}
+        {0 xc1980000}
+        {0 x41980000}
+        {x42ce0000 x44134000}
+        {xc1980000}
+        {x41980000}
+        {x42380000 x44134000}
+        {0 x41980000}}}
+      {cc
+       {f 8192}
+       {p
+        {0 xc1980000}
+        {}
+        {x41980000}
+        {xc1980000}
+        {}
+        {0 xc1980000}
+        {0 x41980000}
+        {}
+        {xc1980000}
+        {x41980000}
+        {}
+        {0 x41980000}}}}
+     {t x42950000 x441a6000
+      {{1 0}}  x44020000 xc404c000
+      {{1 0}}
+      {{1 0}}
+      {{1 0}}     0 1 1
+      {{1 1}}     0 0
+      {{1 0}}
+      {{1 0}}
+      {{1 0}}
+      {{1 0}}
+      {{1 0}}}
+     {a str 1 spx x44800000 spy x44428000 sb 1 tt x41100000}}
+    {curvegroup Rectangle20 1536 bezier
+     {{cc
+       {f 8192}
+       {p
+        {0 xc1980000}
+        {x42380000 x44218000}
+        {x41980000}
+        {xc1980000}
+        {x42ce0000 x44218000}
+        {0 xc1980000}
+        {0 x41980000}
+        {x42ce0000 x44134000}
+        {xc1980000}
+        {x41980000}
+        {x42380000 x44134000}
+        {0 x41980000}}}
+      {cc
+       {f 8192}
+       {p
+        {0 xc1980000}
+        {}
+        {x41980000}
+        {xc1980000}
+        {}
+        {0 xc1980000}
+        {0 x41980000}
+        {}
+        {xc1980000}
+        {x41980000}
+        {}
+        {0 x41980000}}}}
+     {t x42950000 x441a6000
+      {{1 0}}  x442c8000 xc404c000
+      {{1 0}}
+      {{1 0}}
+      {{1 0}}     0 1 1
+      {{1 1}}     0 0
+      {{1 0}}
+      {{1 0}}
+      {{1 0}}
+      {{1 0}}
+      {{1 0}}}
+     {a str 1 spx x44800000 spy x44428000 sb 1 tt x41100000}}
+    {curvegroup Rectangle19 1536 bezier
+     {{cc
+       {f 8192}
+       {p
+        {0 xc1980000}
+        {x42380000 x44218000}
+        {x41980000}
+        {xc1980000}
+        {x42ce0000 x44218000}
+        {0 xc1980000}
+        {0 x41980000}
+        {x42ce0000 x44134000}
+        {xc1980000}
+        {x41980000}
+        {x42380000 x44134000}
+        {0 x41980000}}}
+      {cc
+       {f 8192}
+       {p
+        {0 xc1980000}
+        {}
+        {x41980000}
+        {xc1980000}
+        {}
+        {0 xc1980000}
+        {0 x41980000}
+        {}
+        {xc1980000}
+        {x41980000}
+        {}
+        {0 x41980000}}}}
+     {t x42950000 x441a6000
+      {{1 0}}  x44570000 xc404c000
+      {{1 0}}
+      {{1 0}}
+      {{1 0}}     0 1 1
+      {{1 1}}     0 0
+      {{1 0}}
+      {{1 0}}
+      {{1 0}}
+      {{1 0}}
+      {{1 0}}}
+     {a str 1 spx x44800000 spy x44428000 sb 1 tt x41100000}}
+    {curvegroup Rectangle18 1536 bezier
+     {{cc
+       {f 8192}
+       {p
+        {0 xc1980000}
+        {x42380000 x44218000}
+        {x41980000}
+        {xc1980000}
+        {x42ce0000 x44218000}
+        {0 xc1980000}
+        {0 x41980000}
+        {x42ce0000 x44134000}
+        {xc1980000}
+        {x41980000}
+        {x42380000 x44134000}
+        {0 x41980000}}}
+      {cc
+       {f 8192}
+       {p
+        {0 xc1980000}
+        {}
+        {x41980000}
+        {xc1980000}
+        {}
+        {0 xc1980000}
+        {0 x41980000}
+        {}
+        {xc1980000}
+        {x41980000}
+        {}
+        {0 x41980000}}}}
+     {t x42950000 x441a6000
+      {{1 0}}  x44570000 xc3b38000
+      {{1 0}}
+      {{1 0}}
+      {{1 0}}     0 1 1
+      {{1 1}}     0 0
+      {{1 0}}
+      {{1 0}}
+      {{1 0}}
+      {{1 0}}
+      {{1 0}}}
+     {a str 1 spx x44800000 spy x44428000 sb 1 tt x41100000}}
+    {curvegroup Rectangle17 1536 bezier
+     {{cc
+       {f 8192}
+       {p
+        {0 xc1980000}
+        {x42380000 x44218000}
+        {x41980000}
+        {xc1980000}
+        {x42ce0000 x44218000}
+        {0 xc1980000}
+        {0 x41980000}
+        {x42ce0000 x44134000}
+        {xc1980000}
+        {x41980000}
+        {x42380000 x44134000}
+        {0 x41980000}}}
+      {cc
+       {f 8192}
+       {p
+        {0 xc1980000}
+        {}
+        {x41980000}
+        {xc1980000}
+        {}
+        {0 xc1980000}
+        {0 x41980000}
+        {}
+        {xc1980000}
+        {x41980000}
+        {}
+        {0 x41980000}}}}
+     {t x42950000 x441a6000
+      {{1 0}}  x442c8000 xc3b38000
+      {{1 0}}
+      {{1 0}}
+      {{1 0}}     0 1 1
+      {{1 1}}     0 0
+      {{1 0}}
+      {{1 0}}
+      {{1 0}}
+      {{1 0}}
+      {{1 0}}}
+     {a str 1 spx x44800000 spy x44428000 sb 1 tt x41100000}}
+    {curvegroup Rectangle16 1536 bezier
+     {{cc
+       {f 8192}
+       {p
+        {0 xc1980000}
+        {x42380000 x44218000}
+        {x41980000}
+        {xc1980000}
+        {x42ce0000 x44218000}
+        {0 xc1980000}
+        {0 x41980000}
+        {x42ce0000 x44134000}
+        {xc1980000}
+        {x41980000}
+        {x42380000 x44134000}
+        {0 x41980000}}}
+      {cc
+       {f 8192}
+       {p
+        {0 xc1980000}
+        {}
+        {x41980000}
+        {xc1980000}
+        {}
+        {0 xc1980000}
+        {0 x41980000}
+        {}
+        {xc1980000}
+        {x41980000}
+        {}
+        {0 x41980000}}}}
+     {t x42950000 x441a6000
+      {{1 0}}  x44020000 xc3b38000
+      {{1 0}}
+      {{1 0}}
+      {{1 0}}     0 1 1
+      {{1 1}}     0 0
+      {{1 0}}
+      {{1 0}}
+      {{1 0}}
+      {{1 0}}
+      {{1 0}}}
+     {a str 1 spx x44800000 spy x44428000 sb 1 tt x41100000}}
+    {curvegroup Rectangle15 1536 bezier
+     {{cc
+       {f 8192}
+       {p
+        {0 xc1980000}
+        {x42380000 x44218000}
+        {x41980000}
+        {xc1980000}
+        {x42ce0000 x44218000}
+        {0 xc1980000}
+        {0 x41980000}
+        {x42ce0000 x44134000}
+        {xc1980000}
+        {x41980000}
+        {x42380000 x44134000}
+        {0 x41980000}}}
+      {cc
+       {f 8192}
+       {p
+        {0 xc1980000}
+        {}
+        {x41980000}
+        {xc1980000}
+        {}
+        {0 xc1980000}
+        {0 x41980000}
+        {}
+        {xc1980000}
+        {x41980000}
+        {}
+        {0 x41980000}}}}
+     {t x42950000 x441a6000
+      {{1 0}}  x43af0000 xc3b38000
+      {{1 0}}
+      {{1 0}}
+      {{1 0}}     0 1 1
+      {{1 1}}     0 0
+      {{1 0}}
+      {{1 0}}
+      {{1 0}}
+      {{1 0}}
+      {{1 0}}}
+     {a str 1 spx x44800000 spy x44428000 sb 1 tt x41100000}}
+    {curvegroup Rectangle14 1536 bezier
+     {{cc
+       {f 8192}
+       {p
+        {0 xc1980000}
+        {x42380000 x44218000}
+        {x41980000}
+        {xc1980000}
+        {x42ce0000 x44218000}
+        {0 xc1980000}
+        {0 x41980000}
+        {x42ce0000 x44134000}
+        {xc1980000}
+        {x41980000}
+        {x42380000 x44134000}
+        {0 x41980000}}}
+      {cc
+       {f 8192}
+       {p
+        {0 xc1980000}
+        {}
+        {x41980000}
+        {xc1980000}
+        {}
+        {0 xc1980000}
+        {0 x41980000}
+        {}
+        {xc1980000}
+        {x41980000}
+        {}
+        {0 x41980000}}}}
+     {t x42950000 x441a6000
+      {{1 0}}  x43340000 xc3b38000
+      {{1 0}}
+      {{1 0}}
+      {{1 0}}     0 1 1
+      {{1 1}}     0 0
+      {{1 0}}
+      {{1 0}}
+      {{1 0}}
+      {{1 0}}
+      {{1 0}}}
+     {a str 1 spx x44800000 spy x44428000 sb 1 tt x41100000}}
+    {curvegroup Rectangle13 1536 bezier
+     {{cc
+       {f 8192}
+       {p
+        {0 xc1980000}
+        {x42380000 x44218000}
+        {x41980000}
+        {xc1980000}
+        {x42ce0000 x44218000}
+        {0 xc1980000}
+        {0 x41980000}
+        {x42ce0000 x44134000}
+        {xc1980000}
+        {x41980000}
+        {x42380000 x44134000}
+        {0 x41980000}}}
+      {cc
+       {f 8192}
+       {p
+        {0 xc1980000}
+        {}
+        {x41980000}
+        {xc1980000}
+        {}
+        {0 xc1980000}
+        {0 x41980000}
+        {}
+        {xc1980000}
+        {x41980000}
+        {}
+        {0 x41980000}}}}
+     {t x42950000 x441a6000
+   {{1 0}}  x41200000 xc3b38000
+   {{1 0}}
+   {{1 0}}
+   {{1 0}}  0 1 1
+   {{1 1}}  0 0
+   {{1 0}}
+   {{1 0}}
+   {{1 0}}
+   {{1 0}}
+   {{1 0}}}
+     {a str 1 spx x44800000 spy x44428000 sb 1 tt x41100000}}
+    {curvegroup Rectangle12 1536 bezier
+     {{cc
+       {f 8192}
+       {p
+        {0 xc1980000}
+        {x42380000 x44218000}
+        {x41980000}
+        {xc1980000}
+        {x42ce0000 x44218000}
+        {0 xc1980000}
+        {0 x41980000}
+        {x42ce0000 x44134000}
+        {xc1980000}
+        {x41980000}
+        {x42380000 x44134000}
+        {0 x41980000}}}
+      {cc
+       {f 8192}
+       {p
+        {0 xc1980000}
+        {}
+        {x41980000}
+        {xc1980000}
+        {}
+        {0 xc1980000}
+        {0 x41980000}
+        {}
+        {xc1980000}
+        {x41980000}
+        {}
+        {0 x41980000}}}}
+     {t x42950000 x441a6000
+   {{1 0}}  x41200000 xc33b0000
+   {{1 0}}
+   {{1 0}}
+   {{1 0}}  0 1 1
+   {{1 1}}  0 0
+   {{1 0}}
+   {{1 0}}
+   {{1 0}}
+   {{1 0}}
+   {{1 0}}}
+     {a str 1 spx x44800000 spy x44428000 sb 1 tt x41100000}}
+    {curvegroup Rectangle11 1536 bezier
+     {{cc
+       {f 8192}
+       {p
+        {0 xc1980000}
+        {x42380000 x44218000}
+        {x41980000}
+        {xc1980000}
+        {x42ce0000 x44218000}
+        {0 xc1980000}
+        {0 x41980000}
+        {x42ce0000 x44134000}
+        {xc1980000}
+        {x41980000}
+        {x42380000 x44134000}
+        {0 x41980000}}}
+      {cc
+       {f 8192}
+       {p
+        {0 xc1980000}
+        {}
+        {x41980000}
+        {xc1980000}
+        {}
+        {0 xc1980000}
+        {0 x41980000}
+        {}
+        {xc1980000}
+        {x41980000}
+        {}
+        {0 x41980000}}}}
+     {t x42950000 x441a6000
+      {{1 0}}  x43340000 xc33b0000
+      {{1 0}}
+      {{1 0}}
+      {{1 0}}     0 1 1
+      {{1 1}}     0 0
+      {{1 0}}
+      {{1 0}}
+      {{1 0}}
+      {{1 0}}
+      {{1 0}}}
+     {a str 1 spx x44800000 spy x44428000 sb 1 tt x41100000}}
+    {curvegroup Rectangle10 1536 bezier
+     {{cc
+       {f 8192}
+       {p
+        {0 xc1980000}
+        {x42380000 x44218000}
+        {x41980000}
+        {xc1980000}
+        {x42ce0000 x44218000}
+        {0 xc1980000}
+        {0 x41980000}
+        {x42ce0000 x44134000}
+        {xc1980000}
+        {x41980000}
+        {x42380000 x44134000}
+        {0 x41980000}}}
+      {cc
+       {f 8192}
+       {p
+        {0 xc1980000}
+        {}
+        {x41980000}
+        {xc1980000}
+        {}
+        {0 xc1980000}
+        {0 x41980000}
+        {}
+        {xc1980000}
+        {x41980000}
+        {}
+        {0 x41980000}}}}
+     {t x42950000 x441a6000
+      {{1 0}}  x43af0000 xc33b0000
+      {{1 0}}
+      {{1 0}}
+      {{1 0}}     0 1 1
+      {{1 1}}     0 0
+      {{1 0}}
+      {{1 0}}
+      {{1 0}}
+      {{1 0}}
+      {{1 0}}}
+     {a str 1 spx x44800000 spy x44428000 sb 1 tt x41100000}}
+    {curvegroup Rectangle9 1536 bezier
+     {{cc
+       {f 8192}
+       {p
+        {0 xc1980000}
+        {x42380000 x44218000}
+        {x41980000}
+        {xc1980000}
+        {x42ce0000 x44218000}
+        {0 xc1980000}
+        {0 x41980000}
+        {x42ce0000 x44134000}
+        {xc1980000}
+        {x41980000}
+        {x42380000 x44134000}
+        {0 x41980000}}}
+      {cc
+       {f 8192}
+       {p
+        {0 xc1980000}
+        {}
+        {x41980000}
+        {xc1980000}
+        {}
+        {0 xc1980000}
+        {0 x41980000}
+        {}
+        {xc1980000}
+        {x41980000}
+        {}
+        {0 x41980000}}}}
+     {t x42950000 x441a6000
+      {{1 0}}  x44020000 xc33b0000
+      {{1 0}}
+      {{1 0}}
+      {{1 0}}     0 1 1
+      {{1 1}}     0 0
+      {{1 0}}
+      {{1 0}}
+      {{1 0}}
+      {{1 0}}
+      {{1 0}}}
+     {a str 1 spx x44800000 spy x44428000 sb 1 tt x41100000}}
+    {curvegroup Rectangle8 1536 bezier
+     {{cc
+       {f 8192}
+       {p
+        {0 xc1980000}
+        {x42380000 x44218000}
+        {x41980000}
+        {xc1980000}
+        {x42ce0000 x44218000}
+        {0 xc1980000}
+        {0 x41980000}
+        {x42ce0000 x44134000}
+        {xc1980000}
+        {x41980000}
+        {x42380000 x44134000}
+        {0 x41980000}}}
+      {cc
+       {f 8192}
+       {p
+        {0 xc1980000}
+        {}
+        {x41980000}
+        {xc1980000}
+        {}
+        {0 xc1980000}
+        {0 x41980000}
+        {}
+        {xc1980000}
+        {x41980000}
+        {}
+        {0 x41980000}}}}
+     {t x42950000 x441a6000
+      {{1 0}}  x442c8000 xc33b0000
+      {{1 0}}
+      {{1 0}}
+      {{1 0}}     0 1 1
+      {{1 1}}     0 0
+      {{1 0}}
+      {{1 0}}
+      {{1 0}}
+      {{1 0}}
+      {{1 0}}}
+     {a str 1 spx x44800000 spy x44428000 sb 1 tt x41100000}}
+    {curvegroup Rectangle7 1536 bezier
+     {{cc
+       {f 8192}
+       {p
+        {0 xc1980000}
+        {x42380000 x44218000}
+        {x41980000}
+        {xc1980000}
+        {x42ce0000 x44218000}
+        {0 xc1980000}
+        {0 x41980000}
+        {x42ce0000 x44134000}
+        {xc1980000}
+        {x41980000}
+        {x42380000 x44134000}
+        {0 x41980000}}}
+      {cc
+       {f 8192}
+       {p
+        {0 xc1980000}
+        {}
+        {x41980000}
+        {xc1980000}
+        {}
+        {0 xc1980000}
+        {0 x41980000}
+        {}
+        {xc1980000}
+        {x41980000}
+        {}
+        {0 x41980000}}}}
+     {t x42950000 x441a6000
+      {{1 0}}  x44570000 xc33b0000
+      {{1 0}}
+      {{1 0}}
+      {{1 0}}     0 1 1
+      {{1 1}}     0 0
+      {{1 0}}
+      {{1 0}}
+      {{1 0}}
+      {{1 0}}
+      {{1 0}}}
+     {a str 1 spx x44800000 spy x44428000 sb 1 tt x41100000}}
+    {curvegroup Rectangle6 1536 bezier
+     {{cc
+       {f 8192}
+       {p
+        {0 xc1980000}
+        {x42380000 x44218000}
+        {x41980000}
+        {xc1980000}
+        {x42ce0000 x44218000}
+        {0 xc1980000}
+        {0 x41980000}
+        {x42ce0000 x44134000}
+        {xc1980000}
+        {x41980000}
+        {x42380000 x44134000}
+        {0 x41980000}}}
+      {cc
+       {f 8192}
+       {p
+        {0 xc1980000}
+        {}
+        {x41980000}
+        {xc1980000}
+        {}
+        {0 xc1980000}
+        {0 x41980000}
+        {}
+        {xc1980000}
+        {x41980000}
+        {}
+        {0 x41980000}}}}
+     {t x42950000 x441a6000
+      {{1 0}}  x44570000 xc1700000
+      {{1 0}}
+      {{1 0}}
+      {{1 0}}     0 1 1
+      {{1 1}}     0 0
+      {{1 0}}
+      {{1 0}}
+      {{1 0}}
+      {{1 0}}
+      {{1 0}}}
+     {a str 1 spx x44800000 spy x44428000 sb 1 tt x41100000}}
+    {curvegroup Rectangle5 1536 bezier
+     {{cc
+       {f 8192}
+       {p
+        {0 xc1980000}
+        {x42380000 x44218000}
+        {x41980000}
+        {xc1980000}
+        {x42ce0000 x44218000}
+        {0 xc1980000}
+        {0 x41980000}
+        {x42ce0000 x44134000}
+        {xc1980000}
+        {x41980000}
+        {x42380000 x44134000}
+        {0 x41980000}}}
+      {cc
+       {f 8192}
+       {p
+        {0 xc1980000}
+        {}
+        {x41980000}
+        {xc1980000}
+        {}
+        {0 xc1980000}
+        {0 x41980000}
+        {}
+        {xc1980000}
+        {x41980000}
+        {}
+        {0 x41980000}}}}
+     {t x42950000 x441a6000
+      {{1 0}}  x442c8000 xc1700000
+      {{1 0}}
+      {{1 0}}
+      {{1 0}}     0 1 1
+      {{1 1}}     0 0
+      {{1 0}}
+      {{1 0}}
+      {{1 0}}
+      {{1 0}}
+      {{1 0}}}
+     {a str 1 spx x44800000 spy x44428000 sb 1 tt x41100000}}
+    {curvegroup Rectangle4 1536 bezier
+     {{cc
+       {f 8192}
+       {p
+        {0 xc1980000}
+        {x42380000 x44218000}
+        {x41980000}
+        {xc1980000}
+        {x42ce0000 x44218000}
+        {0 xc1980000}
+        {0 x41980000}
+        {x42ce0000 x44134000}
+        {xc1980000}
+        {x41980000}
+        {x42380000 x44134000}
+        {0 x41980000}}}
+      {cc
+       {f 8192}
+       {p
+        {0 xc1980000}
+        {}
+        {x41980000}
+        {xc1980000}
+        {}
+        {0 xc1980000}
+        {0 x41980000}
+        {}
+        {xc1980000}
+        {x41980000}
+        {}
+        {0 x41980000}}}}
+     {t x42950000 x441a6000
+      {{1 0}}  x44020000 xc1700000
+      {{1 0}}
+      {{1 0}}
+      {{1 0}}     0 1 1
+      {{1 1}}     0 0
+      {{1 0}}
+      {{1 0}}
+      {{1 0}}
+      {{1 0}}
+      {{1 0}}}
+     {a str 1 spx x44800000 spy x44428000 sb 1 tt x41100000}}
+    {curvegroup Rectangle3 1536 bezier
+     {{cc
+       {f 8192}
+       {p
+        {0 xc1980000}
+        {x42380000 x44218000}
+        {x41980000}
+        {xc1980000}
+        {x42ce0000 x44218000}
+        {0 xc1980000}
+        {0 x41980000}
+        {x42ce0000 x44134000}
+        {xc1980000}
+        {x41980000}
+        {x42380000 x44134000}
+        {0 x41980000}}}
+      {cc
+       {f 8192}
+       {p
+        {0 xc1980000}
+        {}
+        {x41980000}
+        {xc1980000}
+        {}
+        {0 xc1980000}
+        {0 x41980000}
+        {}
+        {xc1980000}
+        {x41980000}
+        {}
+        {0 x41980000}}}}
+     {t x42950000 x441a6000
+      {{1 0}}  x43af0000 xc1700000
+      {{1 0}}
+      {{1 0}}
+      {{1 0}}     0 1 1
+      {{1 1}}     0 0
+      {{1 0}}
+      {{1 0}}
+      {{1 0}}
+      {{1 0}}
+      {{1 0}}}
+     {a str 1 spx x44800000 spy x44428000 sb 1 tt x41100000}}
+    {curvegroup Rectangle2 1536 bezier
+     {{cc
+       {f 8192}
+       {p
+        {0 xc1980000}
+        {x42380000 x44218000}
+        {x41980000}
+        {xc1980000}
+        {x42ce0000 x44218000}
+        {0 xc1980000}
+        {0 x41980000}
+        {x42ce0000 x44134000}
+        {xc1980000}
+        {x41980000}
+        {x42380000 x44134000}
+        {0 x41980000}}}
+      {cc
+       {f 8192}
+       {p
+        {0 xc1980000}
+        {}
+        {x41980000}
+        {xc1980000}
+        {}
+        {0 xc1980000}
+        {0 x41980000}
+        {}
+        {xc1980000}
+        {x41980000}
+        {}
+        {0 x41980000}}}}
+     {t x42950000 x441a6000
+      {{1 0}}  x43340000 xc1700000
+      {{1 0}}
+      {{1 0}}
+      {{1 0}}     0 1 1
+      {{1 1}}     0 0
+      {{1 0}}
+      {{1 0}}
+      {{1 0}}
+      {{1 0}}
+      {{1 0}}}
+     {a str 1 spx x44800000 spy x44428000 sb 1 tt x41100000}}
+    {curvegroup Rectangle1 1536 bezier
+     {{cc
+       {f 8192}
+       {p
+        {0 xc1980000}
+        {x42380000 x44218000}
+        {x41980000}
+        {xc1980000}
+        {x42ce0000 x44218000}
+        {0 xc1980000}
+        {0 x41980000}
+        {x42ce0000 x44134000}
+        {xc1980000}
+        {x41980000}
+        {x42380000 x44134000}
+        {0 x41980000}}}
+      {cc
+       {f 8192}
+       {p
+        {0 xc1980000}
+        {}
+        {x41980000}
+        {xc1980000}
+        {}
+        {0 xc1980000}
+        {0 x41980000}
+        {}
+        {xc1980000}
+        {x41980000}
+        {}
+        {0 x41980000}}}}
+     {t x42950000 x441a6000
+   {{1 0}}  x41200000 xc1700000
+   {{1 0}}
+   {{1 0}}
+   {{1 0}}  0 1 1
+   {{1 1}}  0 0
+   {{1 0}}
+   {{1 0}}
+   {{1 0}}
+   {{1 0}}
+   {{1 0}}}
+     {a str 1 spx x44800000 spy x44428000 sb 1 tt x41100000}}}}}}
+  toolbox {selectAll {
+  { undefined str 1 ssx 1 ssy 1 sf 1 sb 1 }
+  { selectAll str 1 ssx 1 ssy 1 sf 1 }
+  { createBezier str 1 ssx 1 ssy 1 sf 1 sb 1 tt 4 }
+  { createBezierCusped str 1 ssx 1 ssy 1 sf 1 sb 1 }
+  { createBSpline str 1 ssx 1 ssy 1 sf 1 sb 1 }
+  { createEllipse str 1 ssx 1 ssy 1 sf 1 sb 1 }
+  { createRectangle str 1 ssx 1 ssy 1 sf 1 sb 1 tt 9 }
+  { createRectangleCusped str 1 ssx 1 ssy 1 sf 1 sb 1 }
+  { brush str 1 ssx 1 ssy 1 sf 1 sb 1 }
+  { eraser src 2 str 1 ssx 1 ssy 1 sf 1 sb 1 }
+  { clone src 1 str 1 ssx 1 ssy 1 sf 1 sb 1 }
+  { reveal src 3 str 1 ssx 1 ssy 1 sf 1 sb 1 }
+  { dodge src 1 str 1 ssx 1 ssy 1 sf 1 sb 1 }
+  { burn src 1 str 1 ssx 1 ssy 1 sf 1 sb 1 }
+  { blur src 1 str 1 ssx 1 ssy 1 sf 1 sb 1 }
+  { sharpen src 1 str 1 ssx 1 ssy 1 sf 1 sb 1 }
+  { smear src 1 str 1 ssx 1 ssy 1 sf 1 sb 1 }
+} }
+  toolbar_brush_hardness 0.200000003
+  toolbar_source_transform_scale {1 1}
+  toolbar_source_transform_center {1024 778}
+  colorOverlay {0 0 0 0}
+  lifetime_type "all frames"
+  view {}
+  locked true
+  "extra matrix" 1
+  motionblur_on true
+  motionblur_shutter_offset_type centred
+  source_black_outside true
+  createNewTrack {{-1} "-1\t(none)\t-1" "1000\tNew Track Layer\t1000"}
+  name Roto1
+  xpos -880
+  ypos 865
+ }
+ Input {
+  inputs 0
+  name source
+  xpos -1300
+  ypos -489
+  number 1
+ }
+ Dot {
+  name Dot1
+  label "INPUT SRC"
+  note_font_size 40
+  xpos -1266
+  ypos -326
+ }
+ Dot {
+  name Dot58
+  xpos -1266
+  ypos 74
+ }
+set N186f32c0 [stack 0]
+ Dot {
+  name Dot30
+  xpos -1266
+  ypos 1034
+ }
+set N186f3630 [stack 0]
+ CornerPin2D {
+  to1 {0 0}
+  to2 {1023 0}
+  to3 {1023 688}
+  to4 {0 688}
+  "extra matrix" 1
+  invert false
+  from1 {{parent.positionsSRC.bottomleft} {parent.positionsSRC.bottomleft}}
+  from2 {{parent.positionsSRC.bottomright} {parent.positionsSRC.bottomright}}
+  from3 {{parent.positionsSRC.topright} {parent.positionsSRC.topright}}
+  from4 {{parent.positionsSRC.topleft} {parent.positionsSRC.topleft}}
+  name CornerPin2D2
+  xpos -1160
+  ypos 1031
+ }
+ Reformat {
+  format "1023 688 0 0 1023 688 1 "
+  resize none
+  center false
+  name Reformat1
+  xpos -1160
+  ypos 1105
+ }
+ Dot {
+  name Dot60
+  xpos -986
+  ypos 1114
+ }
+push $N186f2500
+ Roto {
+  output rgb
+  curves {{{v x3f99999a}
+  {f 0}
+  {n
+   {layer Root
+    {f 1536}
+    {t x44800000 x44428000}
+    {a}
+    {curvegroup Rectangle24 1536 bezier
+     {{cc
+       {f 8192}
+       {p
+        {0 xc1980000}
+        {x42380000 x44218000}
+        {x41980000}
+        {xc1980000}
+        {x42ce0000 x44218000}
+        {0 xc1980000}
+        {0 x41980000}
+        {x42ce0000 x44134000}
+        {xc1980000}
+        {x41980000}
+        {x42380000 x44134000}
+        {0 x41980000}}}
+      {cc
+       {f 8192}
+       {p
+        {0 xc1980000}
+        {}
+        {x41980000}
+        {xc1980000}
+        {}
+        {0 xc1980000}
+        {0 x41980000}
+        {}
+        {xc1980000}
+        {x41980000}
+        {}
+        {0 x41980000}}}}
+     {t x42950000 x441a6000
+   {{1 0}}  x41200000 xc404c000
+   {{1 0}}
+   {{1 0}}
+   {{1 0}}  0 x402ccccd x402ccccd
+   {{1 1}}  0 0
+   {{1 0}}
+   {{1 0}}
+   {{1 0}}
+   {{1 0}}}
+     {a str 1 spx x44800000 spy x44428000 sb 1 tt x41100000 a 0 b x3f633fff g x3f657fff r x3f657fff}}
+    {curvegroup Rectangle23 1536 bezier
+     {{cc
+       {f 8192}
+       {p
+        {0 xc1980000}
+        {x42380000 x44218000}
+        {x41980000}
+        {xc1980000}
+        {x42ce0000 x44218000}
+        {0 xc1980000}
+        {0 x41980000}
+        {x42ce0000 x44134000}
+        {xc1980000}
+        {x41980000}
+        {x42380000 x44134000}
+        {0 x41980000}}}
+      {cc
+       {f 8192}
+       {p
+        {0 xc1980000}
+        {}
+        {x41980000}
+        {xc1980000}
+        {}
+        {0 xc1980000}
+        {0 x41980000}
+        {}
+        {xc1980000}
+        {x41980000}
+        {}
+        {0 x41980000}}}}
+     {t x42950000 x441a6000
+      {{1 0}}     x43340000 xc404c000
+      {{1 0}}
+      {{1 0}}
+      {{1 0}}     0 x402ccccd x402ccccd
+      {{1 1}}     0 0
+      {{1 0}}
+      {{1 0}}
+      {{1 0}}
+      {{1 0}}}
+     {a str 1 spx x44800000 spy x44428000 sb 1 tt x41100000 a 0 b x3f13dfff g x3f13dfff r x3f13dfff}}
+    {curvegroup Rectangle22 1536 bezier
+     {{cc
+       {f 8192}
+       {p
+        {0 xc1980000}
+        {x42380000 x44218000}
+        {x41980000}
+        {xc1980000}
+        {x42ce0000 x44218000}
+        {0 xc1980000}
+        {0 x41980000}
+        {x42ce0000 x44134000}
+        {xc1980000}
+        {x41980000}
+        {x42380000 x44134000}
+        {0 x41980000}}}
+      {cc
+       {f 8192}
+       {p
+        {0 xc1980000}
+        {}
+        {x41980000}
+        {xc1980000}
+        {}
+        {0 xc1980000}
+        {0 x41980000}
+        {}
+        {xc1980000}
+        {x41980000}
+        {}
+        {0 x41980000}}}}
+     {t x42950000 x441a6000
+      {{1 0}}     x43af0000 xc404c000
+      {{1 0}}
+      {{1 0}}
+      {{1 0}}     0 x402ccccd x402ccccd
+      {{1 1}}     0 0
+      {{1 0}}
+      {{1 0}}
+      {{1 0}}
+      {{1 0}}}
+     {a str 1 spx x44800000 spy x44428000 sb 1 tt x41100000 a 0 b x3eb3ffff g x3eb3ffff r x3eb3ffff}}
+    {curvegroup Rectangle21 1536 bezier
+     {{cc
+       {f 8192}
+       {p
+        {0 xc1980000}
+        {x42380000 x44218000}
+        {x41980000}
+        {xc1980000}
+        {x42ce0000 x44218000}
+        {0 xc1980000}
+        {0 x41980000}
+        {x42ce0000 x44134000}
+        {xc1980000}
+        {x41980000}
+        {x42380000 x44134000}
+        {0 x41980000}}}
+      {cc
+       {f 8192}
+       {p
+        {0 xc1980000}
+        {}
+        {x41980000}
+        {xc1980000}
+        {}
+        {0 xc1980000}
+        {0 x41980000}
+        {}
+        {xc1980000}
+        {x41980000}
+        {}
+        {0 x41980000}}}}
+     {t x42950000 x441a6000
+      {{1 0}}     x44020000 xc404c000
+      {{1 0}}
+      {{1 0}}
+      {{1 0}}     0 x402ccccd x402ccccd
+      {{1 1}}     0 0
+      {{1 0}}
+      {{1 0}}
+      {{1 0}}
+      {{1 0}}
+      {{1 0}}}
+     {a str 1 spx x44800000 spy x44428000 sb 1 tt x41100000 a 0 b x3e43bfff g x3e473fff r x3e473fff}}
+    {curvegroup Rectangle20 1536 bezier
+     {{cc
+       {f 8192}
+       {p
+        {0 xc1980000}
+        {x42380000 x44218000}
+        {x41980000}
+        {xc1980000}
+        {x42ce0000 x44218000}
+        {0 xc1980000}
+        {0 x41980000}
+        {x42ce0000 x44134000}
+        {xc1980000}
+        {x41980000}
+        {x42380000 x44134000}
+        {0 x41980000}}}
+      {cc
+       {f 8192}
+       {p
+        {0 xc1980000}
+        {}
+        {x41980000}
+        {xc1980000}
+        {}
+        {0 xc1980000}
+        {0 x41980000}
+        {}
+        {xc1980000}
+        {x41980000}
+        {}
+        {0 x41980000}}}}
+     {t x42950000 x441a6000
+      {{1 0}}     x442c8000 xc404c000
+      {{1 0}}
+      {{1 0}}
+      {{1 0}}     0 x402ccccd x402ccccd
+      {{1 1}}     0 0
+      {{1 0}}
+      {{1 0}}
+      {{1 0}}
+      {{1 0}}
+      {{1 0}}}
+     {a str 1 spx x44800000 spy x44428000 sb 1 tt x41100000 a 0 b x3db9ffff g x3db9ffff r x3db9ffff}}
+    {curvegroup Rectangle19 1536 bezier
+     {{cc
+       {f 8192}
+       {p
+        {0 xc1980000}
+        {x42380000 x44218000}
+        {x41980000}
+        {xc1980000}
+        {x42ce0000 x44218000}
+        {0 xc1980000}
+        {0 x41980000}
+        {x42ce0000 x44134000}
+        {xc1980000}
+        {x41980000}
+        {x42380000 x44134000}
+        {0 x41980000}}}
+      {cc
+       {f 8192}
+       {p
+        {0 xc1980000}
+        {}
+        {x41980000}
+        {xc1980000}
+        {}
+        {0 xc1980000}
+        {0 x41980000}
+        {}
+        {xc1980000}
+        {x41980000}
+        {}
+        {0 x41980000}}}}
+     {t x42950000 x441a6000
+      {{1 0}}     x44570000 xc404c000
+      {{1 0}}
+      {{1 0}}
+      {{1 0}}     0 x402ccccd x402ccccd
+      {{1 1}}     0 0
+      {{1 0}}
+      {{1 0}}
+      {{1 0}}
+      {{1 0}}
+      {{1 0}}}
+     {a str 1 spx x44800000 spy x44428000 sb 1 tt x41100000 a 0 b x3d0c9fff g x3d0c9fff r x3d0c9fff}}
+    {curvegroup Rectangle18 1536 bezier
+     {{cc
+       {f 8192}
+       {p
+        {0 xc1980000}
+        {x42380000 x44218000}
+        {x41980000}
+        {xc1980000}
+        {x42ce0000 x44218000}
+        {0 xc1980000}
+        {0 x41980000}
+        {x42ce0000 x44134000}
+        {xc1980000}
+        {x41980000}
+        {x42380000 x44134000}
+        {0 x41980000}}}
+      {cc
+       {f 8192}
+       {p
+        {0 xc1980000}
+        {}
+        {x41980000}
+        {xc1980000}
+        {}
+        {0 xc1980000}
+        {0 x41980000}
+        {}
+        {xc1980000}
+        {x41980000}
+        {}
+        {0 x41980000}}}}
+     {t x42950000 x441a6000
+      {{1 0}}     x44570000 xc3b38000
+      {{1 0}}
+      {{1 0}}
+      {{1 0}}     0 x402ccccd x402ccccd
+      {{1 1}}     0 0
+      {{1 0}}
+      {{1 0}}
+      {{1 0}}
+      {{1 0}}
+      {{1 0}}}
+     {a str 1 spx x44800000 spy x44428000 sb 1 tt x41100000 a 0 b x3eb67fff g x3e701fff r x3b1f1fff}}
+    {curvegroup Rectangle17 1536 bezier
+     {{cc
+       {f 8192}
+       {p
+        {0 xc1980000}
+        {x42380000 x44218000}
+        {x41980000}
+        {xc1980000}
+        {x42ce0000 x44218000}
+        {0 xc1980000}
+        {0 x41980000}
+        {x42ce0000 x44134000}
+        {xc1980000}
+        {x41980000}
+        {x42380000 x44134000}
+        {0 x41980000}}}
+      {cc
+       {f 8192}
+       {p
+        {0 xc1980000}
+        {}
+        {x41980000}
+        {xc1980000}
+        {}
+        {0 xc1980000}
+        {0 x41980000}
+        {}
+        {xc1980000}
+        {x41980000}
+        {}
+        {0 x41980000}}}}
+     {t x42950000 x441a6000
+      {{1 0}}     x442c8000 xc3b38000
+      {{1 0}}
+      {{1 0}}
+      {{1 0}}     0 x402ccccd x402ccccd
+      {{1 1}}     0 0
+      {{1 0}}
+      {{1 0}}
+      {{1 0}}
+      {{1 0}}
+      {{1 0}}}
+     {a str 1 spx x44800000 spy x44428000 sb 1 tt x41100000 a 0 b x3e99dfff g x3dbe9fff r x3efe5fff}}
+    {curvegroup Rectangle16 1536 bezier
+     {{cc
+       {f 8192}
+       {p
+        {0 xc1980000}
+        {x42380000 x44218000}
+        {x41980000}
+        {xc1980000}
+        {x42ce0000 x44218000}
+        {0 xc1980000}
+        {0 x41980000}
+        {x42ce0000 x44134000}
+        {xc1980000}
+        {x41980000}
+        {x42380000 x44134000}
+        {0 x41980000}}}
+      {cc
+       {f 8192}
+       {p
+        {0 xc1980000}
+        {}
+        {x41980000}
+        {xc1980000}
+        {}
+        {0 xc1980000}
+        {0 x41980000}
+        {}
+        {xc1980000}
+        {x41980000}
+        {}
+        {0 x41980000}}}}
+     {t x42950000 x441a6000
+      {{1 0}}     x44020000 xc3b38000
+      {{1 0}}
+      {{1 0}}
+      {{1 0}}     0 x402ccccd x402ccccd
+      {{1 1}}     0 0
+      {{1 0}}
+      {{1 0}}
+      {{1 0}}
+      {{1 0}}
+      {{1 0}}}
+     {a str 1 spx x44800000 spy x44428000 sb 1 tt x41100000 a 0 b x3c607fff g x3f123fff r x3f4c9fff}}
+    {curvegroup Rectangle15 1536 bezier
+     {{cc
+       {f 8192}
+       {p
+        {0 xc1980000}
+        {x42380000 x44218000}
+        {x41980000}
+        {xc1980000}
+        {x42ce0000 x44218000}
+        {0 xc1980000}
+        {0 x41980000}
+        {x42ce0000 x44134000}
+        {xc1980000}
+        {x41980000}
+        {x42380000 x44134000}
+        {0 x41980000}}}
+      {cc
+       {f 8192}
+       {p
+        {0 xc1980000}
+        {}
+        {x41980000}
+        {xc1980000}
+        {}
+        {0 xc1980000}
+        {0 x41980000}
+        {}
+        {xc1980000}
+        {x41980000}
+        {}
+        {0 x41980000}}}}
+     {t x42950000 x441a6000
+      {{1 0}}     x43af0000 xc3b38000
+      {{1 0}}
+      {{1 0}}
+      {{1 0}}     0 x402ccccd x402ccccd
+      {{1 1}}     0 0
+      {{1 0}}
+      {{1 0}}
+      {{1 0}}
+      {{1 0}}
+      {{1 0}}}
+     {a str 1 spx x44800000 spy x44428000 sb 1 tt x41100000 a 0 b x3d391fff g x3d171fff r x3edb7fff}}
+    {curvegroup Rectangle14 1536 bezier
+     {{cc
+       {f 8192}
+       {p
+        {0 xc1980000}
+        {x42380000 x44218000}
+        {x41980000}
+        {xc1980000}
+        {x42ce0000 x44218000}
+        {0 xc1980000}
+        {0 x41980000}
+        {x42ce0000 x44134000}
+        {xc1980000}
+        {x41980000}
+        {x42380000 x44134000}
+        {0 x41980000}}}
+      {cc
+       {f 8192}
+       {p
+        {0 xc1980000}
+        {}
+        {x41980000}
+        {xc1980000}
+        {}
+        {0 xc1980000}
+        {0 x41980000}
+        {}
+        {xc1980000}
+        {x41980000}
+        {}
+        {0 x41980000}}}}
+     {t x42950000 x441a6000
+      {{1 0}}     x43340000 xc3b38000
+      {{1 0}}
+      {{1 0}}
+      {{1 0}}     0 x402ccccd x402ccccd
+      {{1 1}}     0 0
+      {{1 0}}
+      {{1 0}}
+      {{1 0}}
+      {{1 0}}
+      {{1 0}}}
+     {a str 1 spx x44800000 spy x44428000 sb 1 tt x41100000 a 0 b x3d887fff g x3e979fff r x3d7adfff}}
+    {curvegroup Rectangle13 1536 bezier
+     {{cc
+       {f 8192}
+       {p
+        {0 xc1980000}
+        {x42380000 x44218000}
+        {x41980000}
+        {xc1980000}
+        {x42ce0000 x44218000}
+        {0 xc1980000}
+        {0 x41980000}
+        {x42ce0000 x44134000}
+        {xc1980000}
+        {x41980000}
+        {x42380000 x44134000}
+        {0 x41980000}}}
+      {cc
+       {f 8192}
+       {p
+        {0 xc1980000}
+        {}
+        {x41980000}
+        {xc1980000}
+        {}
+        {0 xc1980000}
+        {0 x41980000}
+        {}
+        {xc1980000}
+        {x41980000}
+        {}
+        {0 x41980000}}}}
+     {t x42950000 x441a6000
+      {{1 0}}     x41200000 xc3b38000
+      {{1 0}}
+      {{1 0}}
+      {{1 0}}     0 x402ccccd x402ccccd
+      {{1 1}}     0 0
+      {{1 0}}
+      {{1 0}}
+      {{1 0}}
+      {{1 0}}
+      {{1 0}}}
+     {a str 1 spx x44800000 spy x44428000 sb 1 tt x41100000 a 0 b x3e9c1fff g x3d3f1fff r x3d21ffff}}
+    {curvegroup Rectangle12 1536 bezier
+     {{cc
+       {f 8192}
+       {p
+        {0 xc1980000}
+        {x42380000 x44218000}
+        {x41980000}
+        {xc1980000}
+        {x42ce0000 x44218000}
+        {0 xc1980000}
+        {0 x41980000}
+        {x42ce0000 x44134000}
+        {xc1980000}
+        {x41980000}
+        {x42380000 x44134000}
+        {0 x41980000}}}
+      {cc
+       {f 8192}
+       {p
+        {0 xc1980000}
+        {}
+        {x41980000}
+        {xc1980000}
+        {}
+        {0 xc1980000}
+        {0 x41980000}
+        {}
+        {xc1980000}
+        {x41980000}
+        {}
+        {0 x41980000}}}}
+     {t x42950000 x441a6000
+      {{1 0}}     x41200000 xc33b0000
+      {{1 0}}
+      {{1 0}}
+      {{1 0}}     0 x402ccccd x402ccccd
+      {{1 1}}     0 0
+      {{1 0}}
+      {{1 0}}
+      {{1 0}}
+      {{1 0}}
+      {{1 0}}}
+     {a str 1 spx x44800000 spy x44428000 sb 1 tt x41100000 a 0 b x3cce5fff g x3e559fff r x3f2c1fff}}
+    {curvegroup Rectangle11 1536 bezier
+     {{cc
+       {f 8192}
+       {p
+        {0 xc1980000}
+        {x42380000 x44218000}
+        {x41980000}
+        {xc1980000}
+        {x42ce0000 x44218000}
+        {0 xc1980000}
+        {0 x41980000}
+        {x42ce0000 x44134000}
+        {xc1980000}
+        {x41980000}
+        {x42380000 x44134000}
+        {0 x41980000}}}
+      {cc
+       {f 8192}
+       {p
+        {0 xc1980000}
+        {}
+        {x41980000}
+        {xc1980000}
+        {}
+        {0 xc1980000}
+        {0 x41980000}
+        {}
+        {xc1980000}
+        {x41980000}
+        {}
+        {0 x41980000}}}}
+     {t x42950000 x441a6000
+      {{1 0}}     x43340000 xc33b0000
+      {{1 0}}
+      {{1 0}}
+      {{1 0}}     0 x402ccccd x402ccccd
+      {{1 1}}     0 0
+      {{1 0}}
+      {{1 0}}
+      {{1 0}}
+      {{1 0}}
+      {{1 0}}}
+     {a str 1 spx x44800000 spy x44428000 sb 1 tt x41100000 a 0 b x3ec33fff g x3dd63fff r x3da43fff}}
+    {curvegroup Rectangle10 1536 bezier
+     {{cc
+       {f 8192}
+       {p
+        {0 xc1980000}
+        {x42380000 x44218000}
+        {x41980000}
+        {xc1980000}
+        {x42ce0000 x44218000}
+        {0 xc1980000}
+        {0 x41980000}
+        {x42ce0000 x44134000}
+        {xc1980000}
+        {x41980000}
+        {x42380000 x44134000}
+        {0 x41980000}}}
+      {cc
+       {f 8192}
+       {p
+        {0 xc1980000}
+        {}
+        {x41980000}
+        {xc1980000}
+        {}
+        {0 xc1980000}
+        {0 x41980000}
+        {}
+        {xc1980000}
+        {x41980000}
+        {}
+        {0 x41980000}}}}
+     {t x42950000 x441a6000
+      {{1 0}}     x43af0000 xc33b0000
+      {{1 0}}
+      {{1 0}}
+      {{1 0}}     0 x402ccccd x402ccccd
+      {{1 1}}     0 0
+      {{1 0}}
+      {{1 0}}
+      {{1 0}}
+      {{1 0}}
+      {{1 0}}}
+     {a str 1 spx x44800000 spy x44428000 sb 1 tt x41100000 a 0 b x3dff7fff g x3dd15fff r x3f087fff}}
+    {curvegroup Rectangle9 1536 bezier
+     {{cc
+       {f 8192}
+       {p
+        {0 xc1980000}
+        {x42380000 x44218000}
+        {x41980000}
+        {xc1980000}
+        {x42ce0000 x44218000}
+        {0 xc1980000}
+        {0 x41980000}
+        {x42ce0000 x44134000}
+        {xc1980000}
+        {x41980000}
+        {x42380000 x44134000}
+        {0 x41980000}}}
+      {cc
+       {f 8192}
+       {p
+        {0 xc1980000}
+        {}
+        {x41980000}
+        {xc1980000}
+        {}
+        {0 xc1980000}
+        {0 x41980000}
+        {}
+        {xc1980000}
+        {x41980000}
+        {}
+        {0 x41980000}}}}
+     {t x42950000 x441a6000
+      {{1 0}}     x44020000 xc33b0000
+      {{1 0}}
+      {{1 0}}
+      {{1 0}}     0 x402ccccd x402ccccd
+      {{1 1}}     0 0
+      {{1 0}}
+      {{1 0}}
+      {{1 0}}
+      {{1 0}}
+      {{1 0}}}
+     {a str 1 spx x44800000 spy x44428000 sb 1 tt x41100000 a 0 b x3e197fff g x3d391fff r x3de53fff}}
+    {curvegroup Rectangle8 1536 bezier
+     {{cc
+       {f 8192}
+       {p
+        {0 xc1980000}
+        {x42380000 x44218000}
+        {x41980000}
+        {xc1980000}
+        {x42ce0000 x44218000}
+        {0 xc1980000}
+        {0 x41980000}
+        {x42ce0000 x44134000}
+        {xc1980000}
+        {x41980000}
+        {x42380000 x44134000}
+        {0 x41980000}}}
+      {cc
+       {f 8192}
+       {p
+        {0 xc1980000}
+        {}
+        {x41980000}
+        {xc1980000}
+        {}
+        {0 xc1980000}
+        {0 x41980000}
+        {}
+        {xc1980000}
+        {x41980000}
+        {}
+        {0 x41980000}}}}
+     {t x42950000 x441a6000
+      {{1 0}}     x442c8000 xc33b0000
+      {{1 0}}
+      {{1 0}}
+      {{1 0}}     0 x402ccccd x402ccccd
+      {{1 1}}     0 0
+      {{1 0}}
+      {{1 0}}
+      {{1 0}}
+      {{1 0}}
+      {{1 0}}}
+     {a str 1 spx x44800000 spy x44428000 sb 1 tt x41100000 a 0 b x3d51ffff g x3f00bfff r x3eac9fff}}
+    {curvegroup Rectangle7 1536 bezier
+     {{cc
+       {f 8192}
+       {p
+        {0 xc1980000}
+        {x42380000 x44218000}
+        {x41980000}
+        {xc1980000}
+        {x42ce0000 x44218000}
+        {0 xc1980000}
+        {0 x41980000}
+        {x42ce0000 x44134000}
+        {xc1980000}
+        {x41980000}
+        {x42380000 x44134000}
+        {0 x41980000}}}
+      {cc
+       {f 8192}
+       {p
+        {0 xc1980000}
+        {}
+        {x41980000}
+        {xc1980000}
+        {}
+        {0 xc1980000}
+        {0 x41980000}
+        {}
+        {xc1980000}
+        {x41980000}
+        {}
+        {0 x41980000}}}}
+     {t x42950000 x441a6000
+      {{1 0}}     x44570000 xc33b0000
+      {{1 0}}
+      {{1 0}}
+      {{1 0}}     0 x402ccccd x402ccccd
+      {{1 1}}     0 0
+      {{1 0}}
+      {{1 0}}
+      {{1 0}}
+      {{1 0}}
+      {{1 0}}}
+     {a str 1 spx x44800000 spy x44428000 sb 1 tt x41100000 a 0 b x3cdfdfff g x3ebb7fff r x3f3edfff}}
+    {curvegroup Rectangle6 1536 bezier
+     {{cc
+       {f 8192}
+       {p
+        {0 xc1980000}
+        {x42380000 x44218000}
+        {x41980000}
+        {xc1980000}
+        {x42ce0000 x44218000}
+        {0 xc1980000}
+        {0 x41980000}
+        {x42ce0000 x44134000}
+        {xc1980000}
+        {x41980000}
+        {x42380000 x44134000}
+        {0 x41980000}}}
+      {cc
+       {f 8192}
+       {p
+        {0 xc1980000}
+        {}
+        {x41980000}
+        {xc1980000}
+        {}
+        {0 xc1980000}
+        {0 x41980000}
+        {}
+        {xc1980000}
+        {x41980000}
+        {}
+        {0 x41980000}}}}
+     {t x42950000 x441a6000
+      {{1 0}}     x44570000 xc1700000
+      {{1 0}}
+      {{1 0}}
+      {{1 0}}     0 x402ccccd x402ccccd
+      {{1 1}}     0 0
+      {{1 0}}
+      {{1 0}}
+      {{1 0}}
+      {{1 0}}
+      {{1 0}}}
+     {a str 1 spx x44800000 spy x44428000 sb 1 tt x41100000 a 0 b x3ecddfff g x3f023fff r x3e0adfff}}
+    {curvegroup Rectangle5 1536 bezier
+     {{cc
+       {f 8192}
+       {p
+        {0 xc1980000}
+        {x42380000 x44218000}
+        {x41980000}
+        {xc1980000}
+        {x42ce0000 x44218000}
+        {0 xc1980000}
+        {0 x41980000}
+        {x42ce0000 x44134000}
+        {xc1980000}
+        {x41980000}
+        {x42380000 x44134000}
+        {0 x41980000}}}
+      {cc
+       {f 8192}
+       {p
+        {0 xc1980000}
+        {}
+        {x41980000}
+        {xc1980000}
+        {}
+        {0 xc1980000}
+        {0 x41980000}
+        {}
+        {xc1980000}
+        {x41980000}
+        {}
+        {0 x41980000}}}}
+     {t x42950000 x441a6000
+      {{1 0}}     x442c8000 xc1700000
+      {{1 0}}
+      {{1 0}}
+      {{1 0}}     0 x402ccccd x402ccccd
+      {{1 1}}     0 0
+      {{1 0}}
+      {{1 0}}
+      {{1 0}}
+      {{1 0}}
+      {{1 0}}}
+     {a str 1 spx x44800000 spy x44428000 sb 1 tt x41100000 a 0 b x3ee11fff g x3e5cffff r x3e701fff}}
+    {curvegroup Rectangle4 1536 bezier
+     {{cc
+       {f 8192}
+       {p
+        {0 xc1980000}
+        {x42380000 x44218000}
+        {x41980000}
+        {xc1980000}
+        {x42ce0000 x44218000}
+        {0 xc1980000}
+        {0 x41980000}
+        {x42ce0000 x44134000}
+        {xc1980000}
+        {x41980000}
+        {x42380000 x44134000}
+        {0 x41980000}}}
+      {cc
+       {f 8192}
+       {p
+        {0 xc1980000}
+        {}
+        {x41980000}
+        {xc1980000}
+        {}
+        {0 xc1980000}
+        {0 x41980000}
+        {}
+        {xc1980000}
+        {x41980000}
+        {}
+        {0 x41980000}}}}
+     {t x42950000 x441a6000
+      {{1 0}}     x44020000 xc1700000
+      {{1 0}}
+      {{1 0}}
+      {{1 0}}     0 x402ccccd x402ccccd
+      {{1 1}}     0 0
+      {{1 0}}
+      {{1 0}}
+      {{1 0}}
+      {{1 0}}
+      {{1 0}}}
+     {a str 1 spx x44800000 spy x44428000 sb 1 tt x41100000 a 0 b x3d65dfff g x3e197fff r x3dc33fff}}
+    {curvegroup Rectangle3 1536 bezier
+     {{cc
+       {f 8192}
+       {p
+        {0 xc1980000}
+        {x42380000 x44218000}
+        {x41980000}
+        {xc1980000}
+        {x42ce0000 x44218000}
+        {0 xc1980000}
+        {0 x41980000}
+        {x42ce0000 x44134000}
+        {xc1980000}
+        {x41980000}
+        {x42380000 x44134000}
+        {0 x41980000}}}
+      {cc
+       {f 8192}
+       {p
+        {0 xc1980000}
+        {}
+        {x41980000}
+        {xc1980000}
+        {}
+        {0 xc1980000}
+        {0 x41980000}
+        {}
+        {xc1980000}
+        {x41980000}
+        {}
+        {0 x41980000}}}}
+     {t x42950000 x441a6000
+      {{1 0}}     x43af0000 xc1700000
+      {{1 0}}
+      {{1 0}}
+      {{1 0}}     0 x402ccccd x402ccccd
+      {{1 1}}     0 0
+      {{1 0}}
+      {{1 0}}
+      {{1 0}}
+      {{1 0}}
+      {{1 0}}}
+     {a str 1 spx x44800000 spy x44428000 sb 1 tt x41100000 a 0 b x3eac9fff g x3e473fff r x3dfa1fff}}
+    {curvegroup Rectangle2 1536 bezier
+     {{cc
+       {f 8192}
+       {p
+        {0 xc1980000}
+        {x42380000 x44218000}
+        {x41980000}
+        {xc1980000}
+        {x42ce0000 x44218000}
+        {0 xc1980000}
+        {0 x41980000}
+        {x42ce0000 x44134000}
+        {xc1980000}
+        {x41980000}
+        {x42380000 x44134000}
+        {0 x41980000}}}
+      {cc
+       {f 8192}
+       {p
+        {0 xc1980000}
+        {}
+        {x41980000}
+        {xc1980000}
+        {}
+        {0 xc1980000}
+        {0 x41980000}
+        {}
+        {xc1980000}
+        {x41980000}
+        {}
+        {0 x41980000}}}}
+     {t x42950000 x441a6000
+      {{1 0}}     x43340000 xc1700000
+      {{1 0}}
+      {{1 0}}
+      {{1 0}}     0 x402ccccd x402ccccd
+      {{1 1}}     0 0
+      {{1 0}}
+      {{1 0}}
+      {{1 0}}
+      {{1 0}}
+      {{1 0}}}
+     {a str 1 spx x44800000 spy x44428000 sb 1 tt x41100000 a 0 b x3e649fff g x3e9c1fff r x3f0a1fff}}
+    {curvegroup Rectangle1 1536 bezier
+     {{cc
+       {f 8192}
+       {p
+        {0 xc1980000}
+        {x42380000 x44218000}
+        {x41980000}
+        {xc1980000}
+        {x42ce0000 x44218000}
+        {0 xc1980000}
+        {0 x41980000}
+        {x42ce0000 x44134000}
+        {xc1980000}
+        {x41980000}
+        {x42380000 x44134000}
+        {0 x41980000}}}
+      {cc
+       {f 8192}
+       {p
+        {0 xc1980000}
+        {}
+        {x41980000}
+        {xc1980000}
+        {}
+        {0 xc1980000}
+        {0 x41980000}
+        {}
+        {xc1980000}
+        {x41980000}
+        {}
+        {0 x41980000}}}}
+     {t x42950000 x441a6000
+      {{1 0}}     x41200000 xc1700000
+      {{1 0}}
+      {{1 0}}
+      {{1 0}}     0 x402ccccd x402ccccd
+      {{1 1}}     0 0
+      {{1 0}}
+      {{1 0}}
+      {{1 0}}
+      {{1 0}}
+      {{1 0}}}
+     {a str 1 spx x44800000 spy x44428000 sb 1 tt x41100000 a 0 b x3d6cbfff g x3dacbfff r x3e2f7fff}}}}}}
+  toolbox {selectAll {
+  { undefined str 1 ssx 1 ssy 1 sf 1 sb 1 }
+  { selectAll str 1 ssx 1 ssy 1 sf 1 }
+  { createBezier str 1 ssx 1 ssy 1 sf 1 sb 1 tt 4 }
+  { createBezierCusped str 1 ssx 1 ssy 1 sf 1 sb 1 }
+  { createBSpline str 1 ssx 1 ssy 1 sf 1 sb 1 }
+  { createEllipse str 1 ssx 1 ssy 1 sf 1 sb 1 }
+  { createRectangle str 1 ssx 1 ssy 1 sf 1 sb 1 tt 9 }
+  { createRectangleCusped str 1 ssx 1 ssy 1 sf 1 sb 1 }
+  { brush str 1 ssx 1 ssy 1 sf 1 sb 1 }
+  { eraser src 2 str 1 ssx 1 ssy 1 sf 1 sb 1 }
+  { clone src 1 str 1 ssx 1 ssy 1 sf 1 sb 1 }
+  { reveal src 3 str 1 ssx 1 ssy 1 sf 1 sb 1 }
+  { dodge src 1 str 1 ssx 1 ssy 1 sf 1 sb 1 }
+  { burn src 1 str 1 ssx 1 ssy 1 sf 1 sb 1 }
+  { blur src 1 str 1 ssx 1 ssy 1 sf 1 sb 1 }
+  { sharpen src 1 str 1 ssx 1 ssy 1 sf 1 sb 1 }
+  { smear src 1 str 1 ssx 1 ssy 1 sf 1 sb 1 }
+} }
+  toolbar_brush_hardness 0.200000003
+  toolbar_source_transform_scale {1 1}
+  toolbar_source_transform_center {1024 778}
+  color {0.8964843154 0.8964843154 0.8876952529 0}
+  colorOverlay {0 0 0 0}
+  lifetime_type "all frames"
+  view {}
+  locked true
+  "extra matrix" 1
+  motionblur_on true
+  motionblur_shutter_offset_type centred
+  source_black_outside true
+  createNewTrack {{-1} "-1\t(none)\t-1" "1000\tNew Track Layer\t1000"}
+  name Roto2
+  xpos -740
+  ypos 871
+ }
+push $N186f1e20
+ Dot {
+  name Dot28
+  xpos -426
+  ypos 1034
+ }
+set N186f4760 [stack 0]
+ CornerPin2D {
+  to1 {0 0}
+  to2 {1023 0}
+  to3 {1023 688}
+  to4 {0 688}
+  "extra matrix" 1
+  invert false
+  from1 {{parent.positionsTGT.bottomleft} {parent.positionsTGT.bottomleft}}
+  from2 {{parent.positionsTGT.bottomright} {parent.positionsTGT.bottomright}}
+  from3 {{parent.positionsTGT.topright} {parent.positionsTGT.topright}}
+  from4 {{parent.positionsTGT.topleft} {parent.positionsTGT.topleft}}
+  name CornerPin2D1
+  xpos -600
+  ypos 1031
+ }
+ Reformat {
+  format "1023 688 0 0 1023 688 1 "
+  resize none
+  center false
+  name Reformat2
+  xpos -600
+  ypos 1105
+ }
+ Switch {
+  inputs 2
+  which {{parent.ignoreTarget}}
+  name Switch_refValues
+  xpos -740
+  ypos 1111
+ }
+ Dissolve {
+  inputs 2+1
+  which 1
+  name Dissolve1
+  xpos -880
+  ypos 1185
+ }
+ Radial {
+  inputs 0
+  area {{positionsTGT.samplerSize} {positionsTGT.samplerSize} 0 0}
+  softness 0
+  color {1 1 1 1}
+  name Radial1
+  xpos -180
+  ypos 231
+  hide_input true
+ }
+ Crop {
+  box {0 0 {positionsTGT.samplerSize} {positionsTGT.samplerSize}}
+  reformat true
+  name Crop1
+  xpos -180
+  ypos 311
+ }
+ Dot {
+  name Dot62
+  xpos -146
+  ypos 394
+ }
+ Dot {
+  name Dot3
+  xpos -6
+  ypos 394
+ }
+set N2b387d30 [stack 0]
+ Dot {
+  name Dot4
+  xpos 134
+  ypos 394
+ }
+set N2b3880a0 [stack 0]
+ Dot {
+  name Dot5
+  xpos 274
+  ypos 394
+ }
+set N2b388410 [stack 0]
+ Dot {
+  name Dot6
+  xpos 414
+  ypos 394
+ }
+set N2b388780 [stack 0]
+ Dot {
+  name Dot7
+  xpos 554
+  ypos 394
+ }
+set N2b388af0 [stack 0]
+ Dot {
+  name Dot8
+  xpos 694
+  ypos 394
+ }
+set N2b388e60 [stack 0]
+ Dot {
+  name Dot9
+  xpos 834
+  ypos 394
+ }
+set N2b3891d0 [stack 0]
+ Dot {
+  name Dot10
+  xpos 974
+  ypos 394
+ }
+set N2b389540 [stack 0]
+ Dot {
+  name Dot11
+  xpos 1114
+  ypos 394
+ }
+set N2b3898b0 [stack 0]
+ Dot {
+  name Dot12
+  xpos 1254
+  ypos 394
+ }
+set N2b389c20 [stack 0]
+ Dot {
+  name Dot13
+  xpos 1394
+  ypos 394
+ }
+set N2b389f90 [stack 0]
+ Dot {
+  name Dot14
+  xpos 1534
+  ypos 394
+ }
+set N2b38a300 [stack 0]
+ Dot {
+  name Dot15
+  xpos 1674
+  ypos 394
+ }
+set N2b74e000 [stack 0]
+ Dot {
+  name Dot16
+  xpos 1814
+  ypos 394
+ }
+set N2b74e370 [stack 0]
+ Dot {
+  name Dot17
+  xpos 1954
+  ypos 394
+ }
+set N2b74e6e0 [stack 0]
+ Dot {
+  name Dot18
+  xpos 2094
+  ypos 394
+ }
+set N2b74ea50 [stack 0]
+ Dot {
+  name Dot19
+  xpos 2234
+  ypos 394
+ }
+set N2b74edc0 [stack 0]
+ Dot {
+  name Dot20
+  xpos 2374
+  ypos 394
+ }
+set N2b74f130 [stack 0]
+ Dot {
+  name Dot21
+  xpos 2514
+  ypos 394
+ }
+set N2b74f4a0 [stack 0]
+ Dot {
+  name Dot22
+  xpos 2654
+  ypos 394
+ }
+set N2b74f810 [stack 0]
+ Dot {
+  name Dot23
+  xpos 2794
+  ypos 394
+ }
+set N2b74fb80 [stack 0]
+ Dot {
+  name Dot24
+  xpos 2934
+  ypos 394
+ }
+set N2b74fef0 [stack 0]
+ Dot {
+  name Dot25
+  xpos 3074
+  ypos 394
+ }
+set N2b750260 [stack 0]
+ Dot {
+  name Dot26
+  xpos 3214
+  ypos 394
+ }
+ Multiply {
+  channels rgb
+  value {0.03433227167 0.03433227167 0.03433227167 0}
+  name Multiply21
+  xpos 3180
+  ypos 687
+  postage_stamp true
+ }
+ Transform {
+  translate {{parent.positionsTGT.p46-positionsTGT.samplerSize/2} {parent.positionsTGT.p46-positionsTGT.samplerSize/2}}
+  center {{positionsTGT.samplerSize/2} {positionsTGT.samplerSize/2}}
+  name Transform_p46
+  xpos 3180
+  ypos 791
+ }
+push $N2b750260
+ Multiply {
+  channels rgb
+  value {0.002428054577 0.2344970554 0.3564452827 0}
+  name Multiply22
+  xpos 3040
+  ypos 602
+  postage_stamp true
+ }
+ Transform {
+  translate {{parent.positionsTGT.p36-positionsTGT.samplerSize/2} {parent.positionsTGT.p36-positionsTGT.samplerSize/2}}
+  center {{positionsTGT.samplerSize/2} {positionsTGT.samplerSize/2}}
+  name Transform_p36
+  xpos 3040
+  ypos 711
+ }
+push $N2b74fef0
+ Multiply {
+  channels rgb
+  value {0.7456054091 0.3662109375 0.02732848935 0}
+  name Multiply23
+  xpos 2900
+  ypos 522
+  postage_stamp true
+ }
+ Transform {
+  translate {{parent.positionsTGT.p26-positionsTGT.samplerSize/2} {parent.positionsTGT.p26-positionsTGT.samplerSize/2}}
+  center {{positionsTGT.samplerSize/2} {positionsTGT.samplerSize/2}}
+  name Transform_p26
+  xpos 2900
+  ypos 631
+ }
+push $N2b74fb80
+ Multiply {
+  channels rgb
+  value {0.1356201172 0.5087890625 0.4020996094 0}
+  name Multiply24
+  xpos 2760
+  ypos 447
+  postage_stamp true
+ }
+ Transform {
+  translate {{parent.positionsTGT.p16-positionsTGT.samplerSize/2} {parent.positionsTGT.p16-positionsTGT.samplerSize/2}}
+  center {{positionsTGT.samplerSize/2} {positionsTGT.samplerSize/2}}
+  name Transform_p16
+  xpos 2760
+  ypos 551
+ }
+push $N2b74f810
+ Multiply {
+  channels rgb
+  value {0.0908203125 0.0908203125 0.0908203125 0}
+  name Multiply17
+  xpos 2620
+  ypos 687
+  postage_stamp true
+ }
+ Transform {
+  translate {{parent.positionsTGT.p45-positionsTGT.samplerSize/2} {parent.positionsTGT.p45-positionsTGT.samplerSize/2}}
+  center {{positionsTGT.samplerSize/2} {positionsTGT.samplerSize/2}}
+  name Transform_p45
+  xpos 2620
+  ypos 791
+ }
+push $N2b74f4a0
+ Multiply {
+  channels rgb
+  value {0.4968261421 0.09307860583 0.3005371094 0}
+  name Multiply18
+  xpos 2480
+  ypos 602
+  postage_stamp true
+ }
+ Transform {
+  translate {{parent.positionsTGT.p35-positionsTGT.samplerSize/2} {parent.positionsTGT.p35-positionsTGT.samplerSize/2}}
+  center {{positionsTGT.samplerSize/2} {positionsTGT.samplerSize/2}}
+  name Transform_p35
+  xpos 2480
+  ypos 711
+ }
+push $N2b74f130
+ Multiply {
+  channels rgb
+  value {0.3371581733 0.5029296279 0.05126952752 0}
+  name Multiply19
+  xpos 2340
+  ypos 522
+  postage_stamp true
+ }
+ Transform {
+  translate {{parent.positionsTGT.p25-positionsTGT.samplerSize/2} {parent.positionsTGT.p25-positionsTGT.samplerSize/2}}
+  center {{positionsTGT.samplerSize/2} {positionsTGT.samplerSize/2}}
+  name Transform_p25
+  xpos 2340
+  ypos 631
+ }
+push $N2b74edc0
+ Multiply {
+  channels rgb
+  value {0.2344970703 0.2158203125 0.4396972656 0}
+  name Multiply20
+  xpos 2200
+  ypos 447
+  postage_stamp true
+ }
+ Transform {
+  translate {{parent.positionsTGT.p15-positionsTGT.samplerSize/2} {parent.positionsTGT.p15-positionsTGT.samplerSize/2}}
+  center {{positionsTGT.samplerSize/2} {positionsTGT.samplerSize/2}}
+  name Transform_p15
+  xpos 2200
+  ypos 551
+ }
+push $N2b74ea50
+ Multiply {
+  channels rgb
+  value {0.1945800781 0.1945800781 0.1911621094 0}
+  name Multiply13
+  xpos 2060
+  ypos 687
+  postage_stamp true
+ }
+ Transform {
+  translate {{parent.positionsTGT.p44-positionsTGT.samplerSize/2} {parent.positionsTGT.p44-positionsTGT.samplerSize/2}}
+  center {{positionsTGT.samplerSize/2} {positionsTGT.samplerSize/2}}
+  name Transform_p44
+  xpos 2060
+  ypos 791
+ }
+push $N2b74e6e0
+ Multiply {
+  channels rgb
+  value {0.7993163466 0.5712890625 0.01370239165 0}
+  name Multiply14
+  xpos 1920
+  ypos 602
+  postage_stamp true
+ }
+ Transform {
+  translate {{parent.positionsTGT.p34-positionsTGT.samplerSize/2} {parent.positionsTGT.p34-positionsTGT.samplerSize/2}}
+  center {{positionsTGT.samplerSize/2} {positionsTGT.samplerSize/2}}
+  name Transform_p34
+  xpos 1920
+  ypos 711
+ }
+push $N2b74e370
+ Multiply {
+  channels rgb
+  value {0.1119384691 0.04519652948 0.1499023288 0}
+  name Multiply15
+  xpos 1780
+  ypos 522
+  postage_stamp true
+ }
+ Transform {
+  translate {{parent.positionsTGT.p24-positionsTGT.samplerSize/2} {parent.positionsTGT.p24-positionsTGT.samplerSize/2}}
+  center {{positionsTGT.samplerSize/2} {positionsTGT.samplerSize/2}}
+  name Transform_p24
+  xpos 1780
+  ypos 631
+ }
+push $N2b74e000
+ Multiply {
+  channels rgb
+  value {0.09533691406 0.1499023438 0.05612182617 0}
+  name Multiply16
+  xpos 1640
+  ypos 447
+  postage_stamp true
+ }
+ Transform {
+  translate {{parent.positionsTGT.p14-positionsTGT.samplerSize/2} {parent.positionsTGT.p14-positionsTGT.samplerSize/2}}
+  center {{positionsTGT.samplerSize/2} {positionsTGT.samplerSize/2}}
+  name Transform_p14
+  xpos 1640
+  ypos 551
+ }
+push $N2b38a300
+ Multiply {
+  channels rgb
+  value {0.3515625 0.3515625 0.3515625 0}
+  name Multiply9
+  xpos 1500
+  ypos 687
+  postage_stamp true
+ }
+ Transform {
+  translate {{parent.positionsTGT.p43-positionsTGT.samplerSize/2} {parent.positionsTGT.p43-positionsTGT.samplerSize/2}}
+  center {{positionsTGT.samplerSize/2} {positionsTGT.samplerSize/2}}
+  name Transform_p43
+  xpos 1500
+  ypos 791
+ }
+push $N2b389f90
+ Multiply {
+  channels rgb
+  value {0.4287109077 0.03689574823 0.04519652948 0}
+  name Multiply10
+  xpos 1360
+  ypos 602
+  postage_stamp true
+ }
+ Transform {
+  translate {{parent.positionsTGT.p33-positionsTGT.samplerSize/2} {parent.positionsTGT.p33-positionsTGT.samplerSize/2}}
+  center {{positionsTGT.samplerSize/2} {positionsTGT.samplerSize/2}}
+  name Transform_p33
+  xpos 1360
+  ypos 711
+ }
+push $N2b389c20
+ Multiply {
+  channels rgb
+  value {0.5332030654 0.1022338793 0.1247558519 0}
+  name Multiply11
+  xpos 1220
+  ypos 522
+  postage_stamp true
+ }
+ Transform {
+  translate {{parent.positionsTGT.p23-positionsTGT.samplerSize/2} {parent.positionsTGT.p23-positionsTGT.samplerSize/2}}
+  center {{positionsTGT.samplerSize/2} {positionsTGT.samplerSize/2}}
+  name Transform_p23
+  xpos 1220
+  ypos 631
+ }
+push $N2b3898b0
+ Multiply {
+  channels rgb
+  value {0.1221313402 0.1945800781 0.3371582031 0}
+  name Multiply12
+  xpos 1080
+  ypos 447
+  postage_stamp true
+ }
+ Transform {
+  translate {{parent.positionsTGT.p13-positionsTGT.samplerSize/2} {parent.positionsTGT.p13-positionsTGT.samplerSize/2}}
+  center {{positionsTGT.samplerSize/2} {positionsTGT.samplerSize/2}}
+  name Transform_p13
+  xpos 1080
+  ypos 551
+ }
+push $N2b389540
+ Multiply {
+  channels rgb
+  value {0.5776366591 0.5776366591 0.5776366591 0}
+  name Multiply5
+  xpos 940
+  ypos 683
+  postage_stamp true
+ }
+ Transform {
+  translate {{parent.positionsTGT.p42-positionsTGT.samplerSize/2} {parent.positionsTGT.p42-positionsTGT.samplerSize/2}}
+  center {{positionsTGT.samplerSize/2} {positionsTGT.samplerSize/2}}
+  name Transform_p42
+  xpos 940
+  ypos 791
+ }
+push $N2b3891d0
+ Multiply {
+  channels rgb
+  value {0.06124877557 0.2961425483 0.06665038317 0}
+  name Multiply6
+  xpos 800
+  ypos 602
+  postage_stamp true
+ }
+ Transform {
+  translate {{parent.positionsTGT.p32-positionsTGT.samplerSize/2} {parent.positionsTGT.p32-positionsTGT.samplerSize/2}}
+  center {{positionsTGT.samplerSize/2} {positionsTGT.samplerSize/2}}
+  name Transform_p32
+  xpos 800
+  ypos 711
+ }
+push $N2b388e60
+ Multiply {
+  channels rgb
+  value {0.08020018786 0.1046142504 0.3813476264 0}
+  name Multiply7
+  xpos 660
+  ypos 522
+  postage_stamp true
+ }
+ Transform {
+  translate {{parent.positionsTGT.p22-positionsTGT.samplerSize/2} {parent.positionsTGT.p22-positionsTGT.samplerSize/2}}
+  center {{positionsTGT.samplerSize/2} {positionsTGT.samplerSize/2}}
+  name Transform_p22
+  xpos 660
+  ypos 631
+ }
+push $N2b388af0
+ Multiply {
+  channels rgb
+  value {0.5395507216 0.3049316108 0.2232665867 0}
+  name Multiply8
+  xpos 520
+  ypos 447
+  postage_stamp true
+ }
+ Transform {
+  translate {{parent.positionsTGT.p12-positionsTGT.samplerSize/2} {parent.positionsTGT.p12-positionsTGT.samplerSize/2}}
+  center {{positionsTGT.samplerSize/2} {positionsTGT.samplerSize/2}}
+  name Transform_p12
+  xpos 520
+  ypos 551
+ }
+push $N2b388780
+ Multiply {
+  channels rgb
+  value {0.8964843154 0.8964843154 0.8876952529 0}
+  name Multiply4
+  xpos 380
+  ypos 682
+  postage_stamp true
+ }
+ Transform {
+  translate {{parent.positionsTGT.p41-positionsTGT.samplerSize/2} {parent.positionsTGT.p41-positionsTGT.samplerSize/2}}
+  center {{positionsTGT.samplerSize/2} {positionsTGT.samplerSize/2}}
+  name Transform_p41
+  xpos 380
+  ypos 791
+ }
+push $N2b388410
+ Multiply {
+  channels rgb
+  value {0.03955078125 0.04666137695 0.3049316406 0}
+  name Multiply3
+  xpos 240
+  ypos 602
+  postage_stamp true
+ }
+ Transform {
+  translate {{parent.positionsTGT.p31-positionsTGT.samplerSize/2} {parent.positionsTGT.p31-positionsTGT.samplerSize/2}}
+  center {{positionsTGT.samplerSize/2} {positionsTGT.samplerSize/2}}
+  name Transform_p31
+  xpos 240
+  ypos 711
+ }
+push $N2b3880a0
+ Multiply {
+  channels rgb
+  value {0.6723632813 0.2086181641 0.02519226074 0}
+  name Multiply2
+  xpos 100
+  ypos 522
+  postage_stamp true
+ }
+ Transform {
+  translate {{parent.positionsTGT.p21-positionsTGT.samplerSize/2} {parent.positionsTGT.p21-positionsTGT.samplerSize/2}}
+  center {{positionsTGT.samplerSize/2} {positionsTGT.samplerSize/2}}
+  name Transform_p21
+  xpos 100
+  ypos 631
+ }
+push $N2b387d30
+ Multiply {
+  channels rgb
+  value {0.1713867188 0.08435058594 0.05780029297 0}
+  name Multiply1
+  xpos -40
+  ypos 447
+  postage_stamp true
+ }
+ Transform {
+  translate {{parent.positionsTGT.p11-positionsTGT.samplerSize/2} {parent.positionsTGT.p11-positionsTGT.samplerSize/2}}
+  center {{positionsTGT.samplerSize/2} {positionsTGT.samplerSize/2}}
+  name Transform_p11
+  xpos -40
+  ypos 551
+ }
+ Dot {
+  name Dot29
+  xpos -6
+  ypos 874
+ }
+ NoOp {
+  inputs 0
+  name NoOp1
+  xpos -180
+  ypos 951
+  hide_input true
+ }
+ Switch {
+  inputs 2
+  which {{parent.darkSkin}}
+  name Switch1
+  xpos -40
+  ypos 951
+ }
+set N184b33c0 [stack 0]
+ Merge2 {
+  inputs 2
+  name Merge2
+  xpos 100
+  ypos 871
+ }
+push $N184b33c0
+ Switch {
+  inputs 2
+  which {{parent.orange}}
+  name Switch7
+  xpos 100
+  ypos 951
+ }
+set N184b3750 [stack 0]
+ Merge2 {
+  inputs 2
+  name Merge3
+  xpos 240
+  ypos 871
+ }
+push $N184b3750
+ Switch {
+  inputs 2
+  which {{parent.blue}}
+  name Switch13
+  xpos 240
+  ypos 951
+ }
+set N184b3ae0 [stack 0]
+ Merge2 {
+  inputs 2
+  name Merge4
+  xpos 380
+  ypos 871
+ }
+push $N184b3ae0
+ Switch {
+  inputs 2
+  which {{parent.white}}
+  name Switch19
+  xpos 380
+  ypos 951
+ }
+set N184b3e70 [stack 0]
+ Merge2 {
+  inputs 2
+  name Merge5
+  xpos 520
+  ypos 871
+ }
+push $N184b3e70
+ Switch {
+  inputs 2
+  which {{parent.lightSkin}}
+  name Switch2
+  xpos 520
+  ypos 951
+ }
+set N184b4200 [stack 0]
+ Merge2 {
+  inputs 2
+  name Merge6
+  xpos 660
+  ypos 871
+ }
+push $N184b4200
+ Switch {
+  inputs 2
+  which {{parent.purplishBlue}}
+  name Switch8
+  xpos 660
+  ypos 951
+ }
+set N184b4590 [stack 0]
+ Merge2 {
+  inputs 2
+  name Merge7
+  xpos 800
+  ypos 871
+ }
+push $N184b4590
+ Switch {
+  inputs 2
+  which {{parent.green}}
+  name Switch14
+  xpos 800
+  ypos 951
+ }
+set N184b4920 [stack 0]
+ Merge2 {
+  inputs 2
+  name Merge8
+  xpos 940
+  ypos 871
+ }
+push $N184b4920
+ Switch {
+  inputs 2
+  which {{parent.neutral8}}
+  name Switch20
+  xpos 940
+  ypos 951
+ }
+set N184b4cb0 [stack 0]
+ Merge2 {
+  inputs 2
+  name Merge9
+  xpos 1080
+  ypos 871
+ }
+push $N184b4cb0
+ Switch {
+  inputs 2
+  which {{parent.blueSky}}
+  name Switch3
+  xpos 1080
+  ypos 951
+ }
+set N184b5040 [stack 0]
+ Merge2 {
+  inputs 2
+  name Merge10
+  xpos 1220
+  ypos 871
+ }
+push $N184b5040
+ Switch {
+  inputs 2
+  which {{parent.moderateRed}}
+  name Switch9
+  xpos 1220
+  ypos 951
+ }
+set N2bb470b0 [stack 0]
+ Merge2 {
+  inputs 2
+  name Merge11
+  xpos 1360
+  ypos 871
+ }
+push $N2bb470b0
+ Switch {
+  inputs 2
+  which {{parent.red}}
+  name Switch15
+  xpos 1360
+  ypos 951
+ }
+set N2bb47440 [stack 0]
+ Merge2 {
+  inputs 2
+  name Merge12
+  xpos 1500
+  ypos 871
+ }
+push $N2bb47440
+ Switch {
+  inputs 2
+  which {{parent.neutral65}}
+  name Switch21
+  xpos 1500
+  ypos 951
+ }
+set N2bb477d0 [stack 0]
+ Merge2 {
+  inputs 2
+  name Merge13
+  xpos 1640
+  ypos 871
+ }
+push $N2bb477d0
+ Switch {
+  inputs 2
+  which {{parent.foliage}}
+  name Switch4
+  xpos 1640
+  ypos 951
+ }
+set N2bb47b60 [stack 0]
+ Merge2 {
+  inputs 2
+  name Merge14
+  xpos 1780
+  ypos 871
+ }
+push $N2bb47b60
+ Switch {
+  inputs 2
+  which {{parent.purple}}
+  name Switch10
+  xpos 1780
+  ypos 951
+ }
+set N2bb47ef0 [stack 0]
+ Merge2 {
+  inputs 2
+  name Merge15
+  xpos 1920
+  ypos 871
+ }
+push $N2bb47ef0
+ Switch {
+  inputs 2
+  which {{parent.yellow}}
+  name Switch16
+  xpos 1920
+  ypos 951
+ }
+set N2bb48280 [stack 0]
+ Merge2 {
+  inputs 2
+  name Merge16
+  xpos 2060
+  ypos 871
+ }
+push $N2bb48280
+ Switch {
+  inputs 2
+  which {{parent.neutral5}}
+  name Switch22
+  xpos 2060
+  ypos 951
+ }
+set N2bb48610 [stack 0]
+ Merge2 {
+  inputs 2
+  name Merge17
+  xpos 2200
+  ypos 871
+ }
+push $N2bb48610
+ Switch {
+  inputs 2
+  which {{parent.blueFlower}}
+  name Switch5
+  xpos 2200
+  ypos 951
+ }
+set N2bb489a0 [stack 0]
+ Merge2 {
+  inputs 2
+  name Merge18
+  xpos 2340
+  ypos 871
+ }
+push $N2bb489a0
+ Switch {
+  inputs 2
+  which {{parent.yellowGreen}}
+  name Switch11
+  xpos 2340
+  ypos 951
+ }
+set N2bb48d30 [stack 0]
+ Merge2 {
+  inputs 2
+  name Merge19
+  xpos 2480
+  ypos 871
+ }
+push $N2bb48d30
+ Switch {
+  inputs 2
+  which {{parent.magenta}}
+  name Switch17
+  xpos 2480
+  ypos 951
+ }
+set N2bb490c0 [stack 0]
+ Merge2 {
+  inputs 2
+  name Merge20
+  xpos 2620
+  ypos 871
+ }
+push $N2bb490c0
+ Switch {
+  inputs 2
+  which {{parent.neutral35}}
+  name Switch23
+  xpos 2620
+  ypos 951
+ }
+set N2bb49450 [stack 0]
+ Merge2 {
+  inputs 2
+  name Merge21
+  xpos 2760
+  ypos 871
+ }
+push $N2bb49450
+ Switch {
+  inputs 2
+  which {{parent.bluishGreen}}
+  name Switch6
+  xpos 2760
+  ypos 951
+ }
+set N2bb497e0 [stack 0]
+ Merge2 {
+  inputs 2
+  name Merge22
+  xpos 2900
+  ypos 871
+ }
+push $N2bb497e0
+ Switch {
+  inputs 2
+  which {{parent.orangeYellow}}
+  name Switch12
+  xpos 2900
+  ypos 951
+ }
+set N2bb49b70 [stack 0]
+ Merge2 {
+  inputs 2
+  name Merge23
+  xpos 3040
+  ypos 871
+ }
+push $N2bb49b70
+ Switch {
+  inputs 2
+  which {{parent.cyan}}
+  name Switch18
+  xpos 3040
+  ypos 951
+ }
+set N2bb49f00 [stack 0]
+ Merge2 {
+  inputs 2
+  name Merge24
+  xpos 3180
+  ypos 871
+ }
+push $N2bb49f00
+ Switch {
+  inputs 2
+  which {{parent.black}}
+  name Switch24
+  xpos 3180
+  ypos 951
+ }
+ Dot {
+  name Dot27
+  xpos 3214
+  ypos 1194
+ }
+push $N186f4760
+ Merge2 {
+  inputs 2
+  name Merge26
+  xpos -320
+  ypos 1191
+ }
+push $N186f4760
+ Switch {
+  inputs 2
+  which {{parent.tgtOverlay}}
+  name Switch_ColorOverlay_TGT
+  xpos -460
+  ypos 1191
+ }
+ NoOp {
+  name PinCorners_TGT
+  xpos -460
+  ypos 1271
+  addUserKnob {20 sourceInput l Source}
+  addUserKnob {7 samplerSize l "sampler size" R 0.01 100}
+  samplerSize {{parent.tgtSize}}
+  addUserKnob {26 ""}
+  addUserKnob {12 topleft}
+  topleft {{parent.tgtTL.x} {parent.tgtTL.y}}
+  addUserKnob {12 topright -STARTLINE}
+  topright {{parent.tgtTR.x} {parent.tgtTR.y}}
+  addUserKnob {12 bottomleft}
+  bottomleft {{parent.tgtBL.x} {parent.tgtBL.y}}
+  addUserKnob {12 bottomright -STARTLINE}
+  bottomright {{parent.tgtBR.x} {parent.tgtBR.y}}
+ }
+ Radial {
+  inputs 0
+  area {{positionsSRC.samplerSize} {positionsSRC.samplerSize} 0 0}
+  softness 0
+  color {1 1 1 1}
+  name Radial2
+  xpos -5080
+  ypos 151
+  hide_input true
+ }
+ Crop {
+  box {0 0 {positionsSRC.samplerSize} {positionsSRC.samplerSize}}
+  reformat true
+  name Crop2
+  xpos -5080
+  ypos 231
+ }
+ Dot {
+  name Dot31
+  xpos -5046
+  ypos 394
+ }
+set N2bcd8330 [stack 0]
+ Dot {
+  name Dot32
+  xpos -4906
+  ypos 394
+ }
+set N2bcd86a0 [stack 0]
+ Dot {
+  name Dot33
+  xpos -4766
+  ypos 394
+ }
+set N2bcd8a10 [stack 0]
+ Dot {
+  name Dot34
+  xpos -4626
+  ypos 394
+ }
+set N2bcd8d80 [stack 0]
+ Dot {
+  name Dot35
+  xpos -4486
+  ypos 394
+ }
+set N2bcd90f0 [stack 0]
+ Dot {
+  name Dot36
+  xpos -4346
+  ypos 394
+ }
+set N2bcd9460 [stack 0]
+ Dot {
+  name Dot37
+  xpos -4206
+  ypos 394
+ }
+set N2bcd97d0 [stack 0]
+ Dot {
+  name Dot38
+  xpos -4066
+  ypos 394
+ }
+set N2bcd9b40 [stack 0]
+ Dot {
+  name Dot39
+  xpos -3926
+  ypos 394
+ }
+set N2bcd9eb0 [stack 0]
+ Dot {
+  name Dot40
+  xpos -3786
+  ypos 394
+ }
+set N2bcda220 [stack 0]
+ Dot {
+  name Dot41
+  xpos -3646
+  ypos 394
+ }
+set N2bcda590 [stack 0]
+ Dot {
+  name Dot42
+  xpos -3506
+  ypos 394
+ }
+set N2bcda900 [stack 0]
+ Dot {
+  name Dot43
+  xpos -3366
+  ypos 394
+ }
+set N2bcdac70 [stack 0]
+ Dot {
+  name Dot44
+  xpos -3226
+  ypos 394
+ }
+set N2bcdafe0 [stack 0]
+ Dot {
+  name Dot45
+  xpos -3086
+  ypos 394
+ }
+set N2bcdb350 [stack 0]
+ Dot {
+  name Dot46
+  xpos -2946
+  ypos 394
+ }
+set N2bcdb6c0 [stack 0]
+ Dot {
+  name Dot47
+  xpos -2806
+  ypos 394
+ }
+set N2bcdba30 [stack 0]
+ Dot {
+  name Dot48
+  xpos -2666
+  ypos 394
+ }
+set N2bcdbda0 [stack 0]
+ Dot {
+  name Dot49
+  xpos -2526
+  ypos 394
+ }
+set N2bd19ef0 [stack 0]
+ Dot {
+  name Dot50
+  xpos -2386
+  ypos 394
+ }
+set N2bd1a260 [stack 0]
+ Dot {
+  name Dot51
+  xpos -2246
+  ypos 394
+ }
+set N2bd1a5d0 [stack 0]
+ Dot {
+  name Dot52
+  xpos -2106
+  ypos 394
+ }
+set N2bd1a940 [stack 0]
+ Dot {
+  name Dot53
+  xpos -1966
+  ypos 394
+ }
+set N2bd1acb0 [stack 0]
+ Dot {
+  name Dot54
+  xpos -1826
+  ypos 394
+ }
+ Multiply {
+  channels rgb
+  value {0.03433227167 0.03433227167 0.03433227167 0}
+  name Multiply25
+  xpos -1860
+  ypos 687
+  postage_stamp true
+ }
+ Transform {
+  translate {{parent.positionsSRC.p46-positionsSRC.samplerSize/2} {parent.positionsSRC.p46-positionsSRC.samplerSize/2}}
+  center {{positionsSRC.samplerSize/2} {positionsSRC.samplerSize/2}}
+  name Transform_p1
+  xpos -1860
+  ypos 791
+ }
+push $N2bd1acb0
+ Multiply {
+  channels rgb
+  value {0.002428054577 0.2344970554 0.3564452827 0}
+  name Multiply26
+  xpos -2000
+  ypos 602
+  postage_stamp true
+ }
+ Transform {
+  translate {{parent.positionsSRC.p36-positionsSRC.samplerSize/2} {parent.positionsSRC.p36-positionsSRC.samplerSize/2}}
+  center {{positionsSRC.samplerSize/2} {positionsSRC.samplerSize/2}}
+  name Transform_p2
+  xpos -2000
+  ypos 711
+ }
+push $N2bd1a940
+ Multiply {
+  channels rgb
+  value {0.7456054091 0.3662109375 0.02732848935 0}
+  name Multiply27
+  xpos -2140
+  ypos 522
+  postage_stamp true
+ }
+ Transform {
+  translate {{parent.positionsSRC.p26-positionsSRC.samplerSize/2} {parent.positionsSRC.p26-positionsSRC.samplerSize/2}}
+  center {{positionsSRC.samplerSize/2} {positionsSRC.samplerSize/2}}
+  name Transform_p3
+  xpos -2140
+  ypos 631
+ }
+push $N2bd1a5d0
+ Multiply {
+  channels rgb
+  value {0.1356201172 0.5087890625 0.4020996094 0}
+  name Multiply28
+  xpos -2280
+  ypos 447
+  postage_stamp true
+ }
+ Transform {
+  translate {{parent.positionsSRC.p16-positionsSRC.samplerSize/2} {parent.positionsSRC.p16-positionsSRC.samplerSize/2}}
+  center {{positionsSRC.samplerSize/2} {positionsSRC.samplerSize/2}}
+  name Transform_p4
+  xpos -2280
+  ypos 551
+ }
+push $N2bd1a260
+ Multiply {
+  channels rgb
+  value {0.0908203125 0.0908203125 0.0908203125 0}
+  name Multiply29
+  xpos -2420
+  ypos 687
+  postage_stamp true
+ }
+ Transform {
+  translate {{parent.positionsSRC.p45-positionsSRC.samplerSize/2} {parent.positionsSRC.p45-positionsSRC.samplerSize/2}}
+  center {{positionsSRC.samplerSize/2} {positionsSRC.samplerSize/2}}
+  name Transform_p5
+  xpos -2420
+  ypos 791
+ }
+push $N2bd19ef0
+ Multiply {
+  channels rgb
+  value {0.4968261421 0.09307860583 0.3005371094 0}
+  name Multiply30
+  xpos -2560
+  ypos 602
+  postage_stamp true
+ }
+ Transform {
+  translate {{parent.positionsSRC.p35-positionsSRC.samplerSize/2} {parent.positionsSRC.p35-positionsSRC.samplerSize/2}}
+  center {{positionsSRC.samplerSize/2} {positionsSRC.samplerSize/2}}
+  name Transform_p6
+  xpos -2560
+  ypos 711
+ }
+push $N2bcdbda0
+ Multiply {
+  channels rgb
+  value {0.3371581733 0.5029296279 0.05126952752 0}
+  name Multiply31
+  xpos -2700
+  ypos 522
+  postage_stamp true
+ }
+ Transform {
+  translate {{parent.positionsSRC.p25-positionsSRC.samplerSize/2} {parent.positionsSRC.p25-positionsSRC.samplerSize/2}}
+  center {{positionsSRC.samplerSize/2} {positionsSRC.samplerSize/2}}
+  name Transform_p7
+  xpos -2700
+  ypos 631
+ }
+push $N2bcdba30
+ Multiply {
+  channels rgb
+  value {0.2344970703 0.2158203125 0.4396972656 0}
+  name Multiply32
+  xpos -2840
+  ypos 447
+  postage_stamp true
+ }
+ Transform {
+  translate {{parent.positionsSRC.p15-positionsSRC.samplerSize/2} {parent.positionsSRC.p15-positionsSRC.samplerSize/2}}
+  center {{positionsSRC.samplerSize/2} {positionsSRC.samplerSize/2}}
+  name Transform_p8
+  xpos -2840
+  ypos 551
+ }
+push $N2bcdb6c0
+ Multiply {
+  channels rgb
+  value {0.1945800781 0.1945800781 0.1911621094 0}
+  name Multiply33
+  xpos -2980
+  ypos 687
+  postage_stamp true
+ }
+ Transform {
+  translate {{parent.positionsSRC.p44-positionsSRC.samplerSize/2} {parent.positionsSRC.p44-positionsSRC.samplerSize/2}}
+  center {{positionsSRC.samplerSize/2} {positionsSRC.samplerSize/2}}
+  name Transform_p9
+  xpos -2980
+  ypos 791
+ }
+push $N2bcdb350
+ Multiply {
+  channels rgb
+  value {0.7993163466 0.5712890625 0.01370239165 0}
+  name Multiply34
+  xpos -3120
+  ypos 602
+  postage_stamp true
+ }
+ Transform {
+  translate {{parent.positionsSRC.p34-positionsSRC.samplerSize/2} {parent.positionsSRC.p34-positionsSRC.samplerSize/2}}
+  center {{positionsSRC.samplerSize/2} {positionsSRC.samplerSize/2}}
+  name Transform_p10
+  xpos -3120
+  ypos 711
+ }
+push $N2bcdafe0
+ Multiply {
+  channels rgb
+  value {0.1119384691 0.04519652948 0.1499023288 0}
+  name Multiply35
+  xpos -3260
+  ypos 522
+  postage_stamp true
+ }
+ Transform {
+  translate {{parent.positionsSRC.p24-positionsSRC.samplerSize/2} {parent.positionsSRC.p24-positionsSRC.samplerSize/2}}
+  center {{positionsSRC.samplerSize/2} {positionsSRC.samplerSize/2}}
+  name Transform_p17
+  xpos -3260
+  ypos 631
+ }
+push $N2bcdac70
+ Multiply {
+  channels rgb
+  value {0.09533691406 0.1499023438 0.05612182617 0}
+  name Multiply36
+  xpos -3400
+  ypos 447
+  postage_stamp true
+ }
+ Transform {
+  translate {{parent.positionsSRC.p14-positionsSRC.samplerSize/2} {parent.positionsSRC.p14-positionsSRC.samplerSize/2}}
+  center {{positionsSRC.samplerSize/2} {positionsSRC.samplerSize/2}}
+  name Transform_p18
+  xpos -3400
+  ypos 551
+ }
+push $N2bcda900
+ Multiply {
+  channels rgb
+  value {0.3515625 0.3515625 0.3515625 0}
+  name Multiply37
+  xpos -3540
+  ypos 687
+  postage_stamp true
+ }
+ Transform {
+  translate {{parent.positionsSRC.p43-positionsSRC.samplerSize/2} {parent.positionsSRC.p43-positionsSRC.samplerSize/2}}
+  center {{positionsSRC.samplerSize/2} {positionsSRC.samplerSize/2}}
+  name Transform_p19
+  xpos -3540
+  ypos 791
+ }
+push $N2bcda590
+ Multiply {
+  channels rgb
+  value {0.4287109077 0.03689574823 0.04519652948 0}
+  name Multiply38
+  xpos -3680
+  ypos 602
+  postage_stamp true
+ }
+ Transform {
+  translate {{parent.positionsSRC.p33-positionsSRC.samplerSize/2} {parent.positionsSRC.p33-positionsSRC.samplerSize/2}}
+  center {{positionsSRC.samplerSize/2} {positionsSRC.samplerSize/2}}
+  name Transform_p20
+  xpos -3680
+  ypos 711
+ }
+push $N2bcda220
+ Multiply {
+  channels rgb
+  value {0.5332030654 0.1022338793 0.1247558519 0}
+  name Multiply39
+  xpos -3820
+  ypos 522
+  postage_stamp true
+ }
+ Transform {
+  translate {{parent.positionsSRC.p23-positionsSRC.samplerSize/2} {parent.positionsSRC.p23-positionsSRC.samplerSize/2}}
+  center {{positionsSRC.samplerSize/2} {positionsSRC.samplerSize/2}}
+  name Transform_p27
+  xpos -3820
+  ypos 631
+ }
+push $N2bcd9eb0
+ Multiply {
+  channels rgb
+  value {0.1221313402 0.1945800781 0.3371582031 0}
+  name Multiply40
+  xpos -3960
+  ypos 447
+  postage_stamp true
+ }
+ Transform {
+  translate {{parent.positionsSRC.p13-positionsSRC.samplerSize/2} {parent.positionsSRC.p13-positionsSRC.samplerSize/2}}
+  center {{positionsSRC.samplerSize/2} {positionsSRC.samplerSize/2}}
+  name Transform_p28
+  xpos -3960
+  ypos 551
+ }
+push $N2bcd9b40
+ Multiply {
+  channels rgb
+  value {0.5776366591 0.5776366591 0.5776366591 0}
+  name Multiply41
+  xpos -4100
+  ypos 683
+  postage_stamp true
+ }
+ Transform {
+  translate {{parent.positionsSRC.p42-positionsSRC.samplerSize/2} {parent.positionsSRC.p42-positionsSRC.samplerSize/2}}
+  center {{positionsSRC.samplerSize/2} {positionsSRC.samplerSize/2}}
+  name Transform_p29
+  xpos -4100
+  ypos 791
+ }
+push $N2bcd97d0
+ Multiply {
+  channels rgb
+  value {0.06124877557 0.2961425483 0.06665038317 0}
+  name Multiply42
+  xpos -4240
+  ypos 602
+  postage_stamp true
+ }
+ Transform {
+  translate {{parent.positionsSRC.p32-positionsSRC.samplerSize/2} {parent.positionsSRC.p32-positionsSRC.samplerSize/2}}
+  center {{positionsSRC.samplerSize/2} {positionsSRC.samplerSize/2}}
+  name Transform_p30
+  xpos -4240
+  ypos 711
+ }
+push $N2bcd9460
+ Multiply {
+  channels rgb
+  value {0.08020018786 0.1046142504 0.3813476264 0}
+  name Multiply43
+  xpos -4380
+  ypos 522
+  postage_stamp true
+ }
+ Transform {
+  translate {{parent.positionsSRC.p22-positionsSRC.samplerSize/2} {parent.positionsSRC.p22-positionsSRC.samplerSize/2}}
+  center {{positionsSRC.samplerSize/2} {positionsSRC.samplerSize/2}}
+  name Transform_p37
+  xpos -4380
+  ypos 631
+ }
+push $N2bcd90f0
+ Multiply {
+  channels rgb
+  value {0.5395507216 0.3049316108 0.2232665867 0}
+  name Multiply44
+  xpos -4520
+  ypos 447
+  postage_stamp true
+ }
+ Transform {
+  translate {{parent.positionsSRC.p12-positionsSRC.samplerSize/2} {parent.positionsSRC.p12-positionsSRC.samplerSize/2}}
+  center {{positionsSRC.samplerSize/2} {positionsSRC.samplerSize/2}}
+  name Transform_p38
+  xpos -4520
+  ypos 551
+ }
+push $N2bcd8d80
+ Multiply {
+  channels rgb
+  value {0.8964843154 0.8964843154 0.8876952529 0}
+  name Multiply45
+  xpos -4660
+  ypos 682
+  postage_stamp true
+ }
+ Transform {
+  translate {{parent.positionsSRC.p41-positionsSRC.samplerSize/2} {parent.positionsSRC.p41-positionsSRC.samplerSize/2}}
+  center {{positionsSRC.samplerSize/2} {positionsSRC.samplerSize/2}}
+  name Transform_p39
+  xpos -4660
+  ypos 791
+ }
+push $N2bcd8a10
+ Multiply {
+  channels rgb
+  value {0.03955078125 0.04666137695 0.3049316406 0}
+  name Multiply46
+  xpos -4800
+  ypos 602
+  postage_stamp true
+ }
+ Transform {
+  translate {{parent.positionsSRC.p31-positionsSRC.samplerSize/2} {parent.positionsSRC.p31-positionsSRC.samplerSize/2}}
+  center {{positionsSRC.samplerSize/2} {positionsSRC.samplerSize/2}}
+  name Transform_p40
+  xpos -4800
+  ypos 711
+ }
+push $N2bcd86a0
+ Multiply {
+  channels rgb
+  value {0.6723632813 0.2086181641 0.02519226074 0}
+  name Multiply47
+  xpos -4940
+  ypos 522
+  postage_stamp true
+ }
+ Transform {
+  translate {{parent.positionsSRC.p21-positionsSRC.samplerSize/2} {parent.positionsSRC.p21-positionsSRC.samplerSize/2}}
+  center {{positionsSRC.samplerSize/2} {positionsSRC.samplerSize/2}}
+  name Transform_p47
+  xpos -4940
+  ypos 631
+ }
+push $N2bcd8330
+ Multiply {
+  channels rgb
+  value {0.1713867188 0.08435058594 0.05780029297 0}
+  name Multiply48
+  xpos -5080
+  ypos 447
+  postage_stamp true
+ }
+ Transform {
+  translate {{parent.positionsSRC.p11-positionsSRC.samplerSize/2} {parent.positionsSRC.p11-positionsSRC.samplerSize/2}}
+  center {{positionsSRC.samplerSize/2} {positionsSRC.samplerSize/2}}
+  name Transform_p48
+  xpos -5080
+  ypos 551
+ }
+ Dot {
+  name Dot55
+  xpos -5046
+  ypos 874
+ }
+ Merge2 {
+  inputs 2
+  name Merge1
+  xpos -4940
+  ypos 871
+ }
+ NoOp {
+  inputs 0
+  name NoOp2
+  xpos -5220
+  ypos 951
+  hide_input true
+ }
+ Switch {
+  inputs 2
+  which {{parent.orange}}
+  name Switch25
+  xpos -4940
+  ypos 951
+ }
+set N2bb4a9b0 [stack 0]
+ Merge2 {
+  inputs 2
+  name Merge25
+  xpos -4800
+  ypos 871
+ }
+push $N2bb4a9b0
+ Switch {
+  inputs 2
+  which {{parent.blue}}
+  name Switch26
+  xpos -4800
+  ypos 951
+ }
+set N2c0590b0 [stack 0]
+ Merge2 {
+  inputs 2
+  name Merge27
+  xpos -4660
+  ypos 871
+ }
+push $N2c0590b0
+ Switch {
+  inputs 2
+  which {{parent.white}}
+  name Switch27
+  xpos -4660
+  ypos 951
+ }
+set N2c059440 [stack 0]
+ Merge2 {
+  inputs 2
+  name Merge28
+  xpos -4520
+  ypos 871
+ }
+push $N2c059440
+ Switch {
+  inputs 2
+  which {{parent.lightSkin}}
+  name Switch28
+  xpos -4520
+  ypos 951
+ }
+set N2c0597d0 [stack 0]
+ Merge2 {
+  inputs 2
+  name Merge29
+  xpos -4380
+  ypos 871
+ }
+push $N2c0597d0
+ Switch {
+  inputs 2
+  which {{parent.purplishBlue}}
+  name Switch29
+  xpos -4380
+  ypos 951
+ }
+set N2c059b60 [stack 0]
+ Merge2 {
+  inputs 2
+  name Merge30
+  xpos -4240
+  ypos 871
+ }
+push $N2c059b60
+ Switch {
+  inputs 2
+  which {{parent.green}}
+  name Switch30
+  xpos -4240
+  ypos 951
+ }
+set N2c059ef0 [stack 0]
+ Merge2 {
+  inputs 2
+  name Merge31
+  xpos -4100
+  ypos 871
+ }
+push $N2c059ef0
+ Switch {
+  inputs 2
+  which {{parent.neutral8}}
+  name Switch31
+  xpos -4100
+  ypos 951
+ }
+set N2c05a280 [stack 0]
+ Merge2 {
+  inputs 2
+  name Merge32
+  xpos -3960
+  ypos 871
+ }
+push $N2c05a280
+ Switch {
+  inputs 2
+  which {{parent.blueSky}}
+  name Switch32
+  xpos -3960
+  ypos 951
+ }
+set N2c05a610 [stack 0]
+ Merge2 {
+  inputs 2
+  name Merge33
+  xpos -3820
+  ypos 871
+ }
+push $N2c05a610
+ Switch {
+  inputs 2
+  which {{parent.moderateRed}}
+  name Switch33
+  xpos -3820
+  ypos 951
+ }
+set N2c05a9a0 [stack 0]
+ Merge2 {
+  inputs 2
+  name Merge34
+  xpos -3680
+  ypos 871
+ }
+push $N2c05a9a0
+ Switch {
+  inputs 2
+  which {{parent.red}}
+  name Switch34
+  xpos -3680
+  ypos 951
+ }
+set N2c05ad30 [stack 0]
+ Merge2 {
+  inputs 2
+  name Merge35
+  xpos -3540
+  ypos 871
+ }
+push $N2c05ad30
+ Switch {
+  inputs 2
+  which {{parent.neutral65}}
+  name Switch35
+  xpos -3540
+  ypos 951
+ }
+set N2c05b0c0 [stack 0]
+ Merge2 {
+  inputs 2
+  name Merge36
+  xpos -3400
+  ypos 871
+ }
+push $N2c05b0c0
+ Switch {
+  inputs 2
+  which {{parent.foliage}}
+  name Switch36
+  xpos -3400
+  ypos 951
+ }
+set N2c05b450 [stack 0]
+ Merge2 {
+  inputs 2
+  name Merge37
+  xpos -3260
+  ypos 871
+ }
+push $N2c05b450
+ Switch {
+  inputs 2
+  which {{parent.purple}}
+  name Switch37
+  xpos -3260
+  ypos 951
+ }
+set N2c05b7e0 [stack 0]
+ Merge2 {
+  inputs 2
+  name Merge38
+  xpos -3120
+  ypos 871
+ }
+push $N2c05b7e0
+ Switch {
+  inputs 2
+  which {{parent.yellow}}
+  name Switch38
+  xpos -3120
+  ypos 951
+ }
+set N2c05bb70 [stack 0]
+ Merge2 {
+  inputs 2
+  name Merge39
+  xpos -2980
+  ypos 871
+ }
+push $N2c05bb70
+ Switch {
+  inputs 2
+  which {{parent.neutral5}}
+  name Switch39
+  xpos -2980
+  ypos 951
+ }
+set N2c05bf00 [stack 0]
+ Merge2 {
+  inputs 2
+  name Merge40
+  xpos -2840
+  ypos 871
+ }
+push $N2c05bf00
+ Switch {
+  inputs 2
+  which {{parent.blueFlower}}
+  name Switch40
+  xpos -2840
+  ypos 951
+ }
+set N2c05c290 [stack 0]
+ Merge2 {
+  inputs 2
+  name Merge41
+  xpos -2700
+  ypos 871
+ }
+push $N2c05c290
+ Switch {
+  inputs 2
+  which {{parent.yellowGreen}}
+  name Switch41
+  xpos -2700
+  ypos 951
+ }
+set N2c05c620 [stack 0]
+ Merge2 {
+  inputs 2
+  name Merge42
+  xpos -2560
+  ypos 871
+ }
+push $N2c05c620
+ Switch {
+  inputs 2
+  which {{parent.magenta}}
+  name Switch42
+  xpos -2560
+  ypos 951
+ }
+set N2c05c9b0 [stack 0]
+ Merge2 {
+  inputs 2
+  name Merge43
+  xpos -2420
+  ypos 871
+ }
+push $N2c05c9b0
+ Switch {
+  inputs 2
+  which {{parent.neutral35}}
+  name Switch43
+  xpos -2420
+  ypos 951
+ }
+set N2c243ed0 [stack 0]
+ Merge2 {
+  inputs 2
+  name Merge44
+  xpos -2280
+  ypos 871
+ }
+push $N2c243ed0
+ Switch {
+  inputs 2
+  which {{parent.bluishGreen}}
+  name Switch44
+  xpos -2280
+  ypos 951
+ }
+set N2c244260 [stack 0]
+ Merge2 {
+  inputs 2
+  name Merge45
+  xpos -2140
+  ypos 871
+ }
+push $N2c244260
+ Switch {
+  inputs 2
+  which {{parent.orangeYellow}}
+  name Switch45
+  xpos -2140
+  ypos 951
+ }
+set N2c2445f0 [stack 0]
+ Merge2 {
+  inputs 2
+  name Merge46
+  xpos -2000
+  ypos 871
+ }
+push $N2c2445f0
+ Switch {
+  inputs 2
+  which {{parent.cyan}}
+  name Switch46
+  xpos -2000
+  ypos 951
+ }
+set N2c244980 [stack 0]
+ Merge2 {
+  inputs 2
+  name Merge47
+  xpos -1860
+  ypos 871
+ }
+push $N2c244980
+ Switch {
+  inputs 2
+  which {{parent.black}}
+  name Switch47
+  xpos -1860
+  ypos 951
+ }
+ Dot {
+  name Dot59
+  xpos -1826
+  ypos 1194
+ }
+push $N186f3630
+ Merge2 {
+  inputs 2
+  name Merge49
+  xpos -1440
+  ypos 1191
+ }
+push $N186f3630
+ Switch {
+  inputs 2
+  which {{parent.srcOverlay}}
+  name Switch_ColorOverlay_SRC
+  xpos -1300
+  ypos 1191
+ }
+ NoOp {
+  name PinCorners_SRC
+  xpos -1300
+  ypos 1271
+  addUserKnob {20 sourceInput l Source}
+  addUserKnob {7 samplerSize l "sampler size" R 0.01 100}
+  samplerSize {{parent.srcSize}}
+  addUserKnob {26 ""}
+  addUserKnob {12 topleft}
+  topleft {{parent.srcTL.x} {parent.srcTL.y}}
+  addUserKnob {12 topright -STARTLINE}
+  topright {{parent.srcTR.x} {parent.srcTR.y}}
+  addUserKnob {12 bottomleft}
+  bottomleft {{parent.srcBL.x} {parent.srcBL.y}}
+  addUserKnob {12 bottomright -STARTLINE}
+  bottomright {{parent.srcBR.x} {parent.srcBR.y}}
+ }
+ Switch {
+  inputs 3
+  which {{parent.currentView}}
+  name ViewerSwitch
+  xpos -880
+  ypos 1351
+ }
+ Output {
+  name Output1
+  xpos -880
+  ypos 1511
+ }
+push $N186f32c0
+ NoOp {
+  name positionsSRC
+  xpos -1720
+  ypos 71
+  addUserKnob {20 User}
+  addUserKnob {7 samplerSize l "sampler size" R 0.01 100}
+  samplerSize {{parent.PinCorners_SRC.samplerSize}}
+  addUserKnob {12 topleft}
+  topleft {{parent.PinCorners_SRC.topleft} {parent.PinCorners_SRC.topleft}}
+  addUserKnob {12 topright}
+  topright {{parent.PinCorners_SRC.topright} {parent.PinCorners_SRC.topright}}
+  addUserKnob {12 bottomleft}
+  bottomleft {{parent.PinCorners_SRC.bottomleft} {parent.PinCorners_SRC.bottomleft}}
+  addUserKnob {12 bottomright}
+  bottomright {{parent.PinCorners_SRC.bottomright} {parent.PinCorners_SRC.bottomright}}
+  addUserKnob {26 ""}
+  addUserKnob {12 p11}
+  p11 {{(((topright.x*7+bottomright.x*1)/8-(sqrt(pow(((topleft.x-topright.x)*7+(bottomleft.x-bottomright.x)*1)/8,2))/12*11))*1+11*((topleft.x*7+bottomleft.x*1)/8+(sqrt(pow(((topleft.x-topright.x)*7+(bottomleft.x-bottomright.x)*1)/8,2))/12*1)))/12} {((((topleft.y*11+topright.y*1)/12-(sqrt(pow(((topleft.y-bottomleft.y)*11+(topright.y+bottomright.y)*1)/12,2))/8*1))*7+1*((bottomleft.y*11+bottomright.y*1)/12+(sqrt(pow(((topleft.y-bottomleft.y)*11+(topright.y+bottomright.y)*1)/12,2))/8*7))))/8}}
+  addUserKnob {18 p11src -STARTLINE}
+  p11src {{"\[sample knob red p11.x p11.y knob.samplerSize knob.samplerSize]"} {"\[sample knob green p11.x p11.y knob.samplerSize knob.samplerSize]"} {"\[sample knob blue p11.x p11.y knob.samplerSize knob.samplerSize]"}}
+  addUserKnob {6 p11src_panelDropped l "panel dropped state" -STARTLINE +HIDDEN}
+  addUserKnob {12 p12}
+  p12 {{(((topright.x*7+bottomright.x*1)/8-(sqrt(pow(((topleft.x-topright.x)*7+(bottomleft.x-bottomright.x)*1)/8,2))/12*9))*3+9*((topleft.x*7+bottomleft.x*1)/8+(sqrt(pow(((topleft.x-topright.x)*7+(bottomleft.x-bottomright.x)*1)/8,2))/12*3)))/12} {((((topleft.y*9+topright.y*3)/12-(sqrt(pow(((topleft.y-bottomleft.y)*9+(topright.y+bottomright.y)*3)/12,2))/8*1))*7+1*((bottomleft.y*9+bottomright.y*3)/12+(sqrt(pow(((topleft.y-bottomleft.y)*9+(topright.y+bottomright.y)*3)/12,2))/8*7))))/8}}
+  addUserKnob {18 p12src -STARTLINE}
+  p12src {{"\[sample knob red p12.x p12.y knob.samplerSize knob.samplerSize]"} {"\[sample knob green p12.x p12.y knob.samplerSize knob.samplerSize]"} {"\[sample knob blue p12.x p12.y knob.samplerSize knob.samplerSize]"}}
+  addUserKnob {6 p12src_panelDropped l "panel dropped state" -STARTLINE +HIDDEN}
+  addUserKnob {12 p13}
+  p13 {{(((topright.x*7+bottomright.x*1)/8-(sqrt(pow(((topleft.x-topright.x)*7+(bottomleft.x-bottomright.x)*1)/8,2))/12*7))*5+7*((topleft.x*7+bottomleft.x*1)/8+(sqrt(pow(((topleft.x-topright.x)*7+(bottomleft.x-bottomright.x)*1)/8,2))/12*5)))/12} {((((topleft.y*7+topright.y*5)/12-(sqrt(pow(((topleft.y-bottomleft.y)*7+(topright.y+bottomright.y)*5)/12,2))/8*1))*7+1*((bottomleft.y*7+bottomright.y*5)/12+(sqrt(pow(((topleft.y-bottomleft.y)*7+(topright.y+bottomright.y)*5)/12,2))/8*7))))/8}}
+  addUserKnob {18 p13src -STARTLINE}
+  p13src {{"\[sample knob red p13.x p13.y knob.samplerSize knob.samplerSize]"} {"\[sample knob green p13.x p13.y knob.samplerSize knob.samplerSize]"} {"\[sample knob blue p13.x p13.y knob.samplerSize knob.samplerSize]"}}
+  addUserKnob {6 p13src_panelDropped l "panel dropped state" -STARTLINE +HIDDEN}
+  addUserKnob {12 p14}
+  p14 {{(((topright.x*7+bottomright.x*1)/8-(sqrt(pow(((topleft.x-topright.x)*7+(bottomleft.x-bottomright.x)*1)/8,2))/12*5))*7+5*((topleft.x*7+bottomleft.x*1)/8+(sqrt(pow(((topleft.x-topright.x)*7+(bottomleft.x-bottomright.x)*1)/8,2))/12*7)))/12} {((((topleft.y*5+topright.y*7)/12-(sqrt(pow(((topleft.y-bottomleft.y)*5+(topright.y+bottomright.y)*7)/12,2))/8*1))*7+1*((bottomleft.y*5+bottomright.y*7)/12+(sqrt(pow(((topleft.y-bottomleft.y)*5+(topright.y+bottomright.y)*7)/12,2))/8*7))))/8}}
+  addUserKnob {18 p14src -STARTLINE}
+  p14src {{"\[sample knob red p14.x p14.y knob.samplerSize knob.samplerSize]"} {"\[sample knob green p14.x p14.y knob.samplerSize knob.samplerSize]"} {"\[sample knob blue p14.x p14.y knob.samplerSize knob.samplerSize]"}}
+  addUserKnob {6 p14src_panelDropped l "panel dropped state" -STARTLINE +HIDDEN}
+  addUserKnob {12 p15}
+  p15 {{(((topright.x*7+bottomright.x*1)/8-(sqrt(pow(((topleft.x-topright.x)*7+(bottomleft.x-bottomright.x)*1)/8,2))/12*3))*9+3*((topleft.x*7+bottomleft.x*1)/8+(sqrt(pow(((topleft.x-topright.x)*7+(bottomleft.x-bottomright.x)*1)/8,2))/12*9)))/12} {((((topleft.y*3+topright.y*9)/12-(sqrt(pow(((topleft.y-bottomleft.y)*3+(topright.y+bottomright.y)*9)/12,2))/8*1))*7+1*((bottomleft.y*3+bottomright.y*9)/12+(sqrt(pow(((topleft.y-bottomleft.y)*3+(topright.y+bottomright.y)*9)/12,2))/8*7))))/8}}
+  addUserKnob {18 p15src -STARTLINE}
+  p15src {{"\[sample knob red p15.x p15.y knob.samplerSize knob.samplerSize]"} {"\[sample knob green p15.x p15.y knob.samplerSize knob.samplerSize]"} {"\[sample knob blue p15.x p15.y knob.samplerSize knob.samplerSize]"}}
+  addUserKnob {6 p15src_panelDropped l "panel dropped state" -STARTLINE +HIDDEN}
+  addUserKnob {12 p16}
+  p16 {{(((topright.x*7+bottomright.x*1)/8-(sqrt(pow(((topleft.x-topright.x)*7+(bottomleft.x-bottomright.x)*1)/8,2))/12*1))*11+1*((topleft.x*7+bottomleft.x*1)/8+(sqrt(pow(((topleft.x-topright.x)*7+(bottomleft.x-bottomright.x)*1)/8,2))/12*11)))/12} {((((topleft.y*1+topright.y*11)/12-(sqrt(pow(((topleft.y-bottomleft.y)*1+(topright.y+bottomright.y)*11)/12,2))/8*1))*7+1*((bottomleft.y*1+bottomright.y*11)/12+(sqrt(pow(((topleft.y-bottomleft.y)*1+(topright.y+bottomright.y)*11)/12,2))/8*7))))/8}}
+  addUserKnob {18 p16src -STARTLINE}
+  p16src {{"\[sample knob red p16.x p16.y knob.samplerSize knob.samplerSize]"} {"\[sample knob green p16.x p16.y knob.samplerSize knob.samplerSize]"} {"\[sample knob blue p16.x p16.y knob.samplerSize knob.samplerSize]"}}
+  addUserKnob {6 p16src_panelDropped l "panel dropped state" -STARTLINE +HIDDEN}
+  addUserKnob {26 ""}
+  addUserKnob {12 p21}
+  p21 {{(((topright.x*5+bottomright.x*3)/8-(sqrt(pow(((topleft.x-topright.x)*5+(bottomleft.x-bottomright.x)*3)/8,2))/12*11))*1+11*((topleft.x*5+bottomleft.x*3)/8+(sqrt(pow(((topleft.x-topright.x)*5+(bottomleft.x-bottomright.x)*3)/8,2))/12*1)))/12} {((((topleft.y*11+topright.y*1)/12-(sqrt(pow(((topleft.y-bottomleft.y)*11+(topright.y+bottomright.y)*1)/12,2))/8*3))*5+3*((bottomleft.y*11+bottomright.y*1)/12+(sqrt(pow(((topleft.y-bottomleft.y)*11+(topright.y+bottomright.y)*1)/12,2))/8*5))))/8}}
+  addUserKnob {18 p21src -STARTLINE}
+  p21src {{"\[sample knob red p21.x p21.y knob.samplerSize knob.samplerSize]"} {"\[sample knob green p21.x p21.y knob.samplerSize knob.samplerSize]"} {"\[sample knob blue p21.x p21.y knob.samplerSize knob.samplerSize]"}}
+  addUserKnob {6 p21src_panelDropped l "panel dropped state" -STARTLINE +HIDDEN}
+  addUserKnob {12 p22}
+  p22 {{(((topright.x*5+bottomright.x*3)/8-(sqrt(pow(((topleft.x-topright.x)*5+(bottomleft.x-bottomright.x)*3)/8,2))/12*9))*3+9*((topleft.x*5+bottomleft.x*3)/8+(sqrt(pow(((topleft.x-topright.x)*5+(bottomleft.x-bottomright.x)*3)/8,2))/12*3)))/12} {((((topleft.y*9+topright.y*3)/12-(sqrt(pow(((topleft.y-bottomleft.y)*9+(topright.y+bottomright.y)*3)/12,2))/8*3))*5+3*((bottomleft.y*9+bottomright.y*3)/12+(sqrt(pow(((topleft.y-bottomleft.y)*9+(topright.y+bottomright.y)*3)/12,2))/8*5))))/8}}
+  addUserKnob {18 p22src -STARTLINE}
+  p22src {{"\[sample knob red p22.x p22.y knob.samplerSize knob.samplerSize]"} {"\[sample knob green p22.x p22.y knob.samplerSize knob.samplerSize]"} {"\[sample knob blue p22.x p22.y knob.samplerSize knob.samplerSize]"}}
+  addUserKnob {6 p22src_panelDropped l "panel dropped state" -STARTLINE +HIDDEN}
+  addUserKnob {12 p23}
+  p23 {{(((topright.x*5+bottomright.x*3)/8-(sqrt(pow(((topleft.x-topright.x)*5+(bottomleft.x-bottomright.x)*3)/8,2))/12*7))*5+7*((topleft.x*5+bottomleft.x*3)/8+(sqrt(pow(((topleft.x-topright.x)*5+(bottomleft.x-bottomright.x)*3)/8,2))/12*5)))/12} {((((topleft.y*7+topright.y*5)/12-(sqrt(pow(((topleft.y-bottomleft.y)*7+(topright.y+bottomright.y)*5)/12,2))/8*3))*5+3*((bottomleft.y*7+bottomright.y*5)/12+(sqrt(pow(((topleft.y-bottomleft.y)*7+(topright.y+bottomright.y)*5)/12,2))/8*5))))/8}}
+  addUserKnob {18 p23src -STARTLINE}
+  p23src {{"\[sample knob red p23.x p23.y knob.samplerSize knob.samplerSize]"} {"\[sample knob green p23.x p23.y knob.samplerSize knob.samplerSize]"} {"\[sample knob blue p23.x p23.y knob.samplerSize knob.samplerSize]"}}
+  addUserKnob {6 p23src_panelDropped l "panel dropped state" -STARTLINE +HIDDEN}
+  addUserKnob {12 p24}
+  p24 {{(((topright.x*5+bottomright.x*3)/8-(sqrt(pow(((topleft.x-topright.x)*5+(bottomleft.x-bottomright.x)*3)/8,2))/12*5))*7+5*((topleft.x*5+bottomleft.x*3)/8+(sqrt(pow(((topleft.x-topright.x)*5+(bottomleft.x-bottomright.x)*3)/8,2))/12*7)))/12} {((((topleft.y*5+topright.y*7)/12-(sqrt(pow(((topleft.y-bottomleft.y)*5+(topright.y+bottomright.y)*7)/12,2))/8*3))*5+3*((bottomleft.y*5+bottomright.y*7)/12+(sqrt(pow(((topleft.y-bottomleft.y)*5+(topright.y+bottomright.y)*7)/12,2))/8*5))))/8}}
+  addUserKnob {18 p24src -STARTLINE}
+  p24src {{"\[sample knob red p24.x p24.y knob.samplerSize knob.samplerSize]"} {"\[sample knob green p24.x p24.y knob.samplerSize knob.samplerSize]"} {"\[sample knob blue p24.x p24.y knob.samplerSize knob.samplerSize]"}}
+  addUserKnob {6 p24src_panelDropped l "panel dropped state" -STARTLINE +HIDDEN}
+  addUserKnob {12 p25}
+  p25 {{(((topright.x*5+bottomright.x*3)/8-(sqrt(pow(((topleft.x-topright.x)*5+(bottomleft.x-bottomright.x)*3)/8,2))/12*3))*9+3*((topleft.x*5+bottomleft.x*3)/8+(sqrt(pow(((topleft.x-topright.x)*5+(bottomleft.x-bottomright.x)*3)/8,2))/12*9)))/12} {((((topleft.y*3+topright.y*9)/12-(sqrt(pow(((topleft.y-bottomleft.y)*3+(topright.y+bottomright.y)*9)/12,2))/8*3))*5+3*((bottomleft.y*3+bottomright.y*9)/12+(sqrt(pow(((topleft.y-bottomleft.y)*3+(topright.y+bottomright.y)*9)/12,2))/8*5))))/8}}
+  addUserKnob {18 p25src -STARTLINE}
+  p25src {{"\[sample knob red p25.x p25.y knob.samplerSize knob.samplerSize]"} {"\[sample knob green p25.x p25.y knob.samplerSize knob.samplerSize]"} {"\[sample knob blue p25.x p25.y knob.samplerSize knob.samplerSize]"}}
+  addUserKnob {6 p25src_panelDropped l "panel dropped state" -STARTLINE +HIDDEN}
+  addUserKnob {12 p26}
+  p26 {{(((topright.x*5+bottomright.x*3)/8-(sqrt(pow(((topleft.x-topright.x)*5+(bottomleft.x-bottomright.x)*3)/8,2))/12*1))*11+1*((topleft.x*5+bottomleft.x*3)/8+(sqrt(pow(((topleft.x-topright.x)*5+(bottomleft.x-bottomright.x)*3)/8,2))/12*11)))/12} {((((topleft.y*1+topright.y*11)/12-(sqrt(pow(((topleft.y-bottomleft.y)*1+(topright.y+bottomright.y)*11)/12,2))/8*3))*5+3*((bottomleft.y*1+bottomright.y*11)/12+(sqrt(pow(((topleft.y-bottomleft.y)*1+(topright.y+bottomright.y)*11)/12,2))/8*5))))/8}}
+  addUserKnob {18 p26src -STARTLINE}
+  p26src {{"\[sample knob red p26.x p26.y knob.samplerSize knob.samplerSize]"} {"\[sample knob green p26.x p26.y knob.samplerSize knob.samplerSize]"} {"\[sample knob blue p26.x p26.y knob.samplerSize knob.samplerSize]"}}
+  addUserKnob {6 p26src_panelDropped l "panel dropped state" -STARTLINE +HIDDEN}
+  addUserKnob {26 ""}
+  addUserKnob {12 p31}
+  p31 {{(((topright.x*3+bottomright.x*5)/8-(sqrt(pow(((topleft.x-topright.x)*3+(bottomleft.x-bottomright.x)*5)/8,2))/12*11))*1+11*((topleft.x*3+bottomleft.x*5)/8+(sqrt(pow(((topleft.x-topright.x)*3+(bottomleft.x-bottomright.x)*5)/8,2))/12*1)))/12} {((((topleft.y*11+topright.y*1)/12-(sqrt(pow(((topleft.y-bottomleft.y)*11+(topright.y+bottomright.y)*1)/12,2))/8*5))*3+5*((bottomleft.y*11+bottomright.y*1)/12+(sqrt(pow(((topleft.y-bottomleft.y)*11+(topright.y+bottomright.y)*1)/12,2))/8*3))))/8}}
+  addUserKnob {18 p31src -STARTLINE}
+  p31src {{"\[sample knob red p31.x p31.y knob.samplerSize knob.samplerSize]"} {"\[sample knob green p31.x p31.y knob.samplerSize knob.samplerSize]"} {"\[sample knob blue p31.x p31.y knob.samplerSize knob.samplerSize]"}}
+  addUserKnob {6 p31src_panelDropped l "panel dropped state" -STARTLINE +HIDDEN}
+  addUserKnob {12 p32}
+  p32 {{(((topright.x*3+bottomright.x*5)/8-(sqrt(pow(((topleft.x-topright.x)*3+(bottomleft.x-bottomright.x)*5)/8,2))/12*9))*3+9*((topleft.x*3+bottomleft.x*5)/8+(sqrt(pow(((topleft.x-topright.x)*3+(bottomleft.x-bottomright.x)*5)/8,2))/12*3)))/12} {((((topleft.y*9+topright.y*3)/12-(sqrt(pow(((topleft.y-bottomleft.y)*9+(topright.y+bottomright.y)*3)/12,2))/8*5))*3+5*((bottomleft.y*9+bottomright.y*3)/12+(sqrt(pow(((topleft.y-bottomleft.y)*9+(topright.y+bottomright.y)*3)/12,2))/8*3))))/8}}
+  addUserKnob {18 p32src -STARTLINE}
+  p32src {{"\[sample knob red p32.x p32.y knob.samplerSize knob.samplerSize]"} {"\[sample knob green p32.x p32.y knob.samplerSize knob.samplerSize]"} {"\[sample knob blue p32.x p32.y knob.samplerSize knob.samplerSize]"}}
+  addUserKnob {6 p32src_panelDropped l "panel dropped state" -STARTLINE +HIDDEN}
+  addUserKnob {12 p33}
+  p33 {{(((topright.x*3+bottomright.x*5)/8-(sqrt(pow(((topleft.x-topright.x)*3+(bottomleft.x-bottomright.x)*5)/8,2))/12*7))*5+7*((topleft.x*3+bottomleft.x*5)/8+(sqrt(pow(((topleft.x-topright.x)*3+(bottomleft.x-bottomright.x)*5)/8,2))/12*5)))/12} {((((topleft.y*7+topright.y*5)/12-(sqrt(pow(((topleft.y-bottomleft.y)*7+(topright.y+bottomright.y)*5)/12,2))/8*5))*3+5*((bottomleft.y*7+bottomright.y*5)/12+(sqrt(pow(((topleft.y-bottomleft.y)*7+(topright.y+bottomright.y)*5)/12,2))/8*3))))/8}}
+  addUserKnob {18 p33src -STARTLINE}
+  p33src {{"\[sample knob red p33.x p33.y knob.samplerSize knob.samplerSize]"} {"\[sample knob green p33.x p33.y knob.samplerSize knob.samplerSize]"} {"\[sample knob blue p33.x p33.y knob.samplerSize knob.samplerSize]"}}
+  addUserKnob {6 p33src_panelDropped l "panel dropped state" -STARTLINE +HIDDEN}
+  addUserKnob {12 p34}
+  p34 {{(((topright.x*3+bottomright.x*5)/8-(sqrt(pow(((topleft.x-topright.x)*3+(bottomleft.x-bottomright.x)*5)/8,2))/12*5))*7+5*((topleft.x*3+bottomleft.x*5)/8+(sqrt(pow(((topleft.x-topright.x)*3+(bottomleft.x-bottomright.x)*5)/8,2))/12*7)))/12} {((((topleft.y*5+topright.y*7)/12-(sqrt(pow(((topleft.y-bottomleft.y)*5+(topright.y+bottomright.y)*7)/12,2))/8*5))*3+5*((bottomleft.y*5+bottomright.y*7)/12+(sqrt(pow(((topleft.y-bottomleft.y)*5+(topright.y+bottomright.y)*7)/12,2))/8*3))))/8}}
+  addUserKnob {18 p34src -STARTLINE}
+  p34src {{"\[sample knob red p34.x p34.y knob.samplerSize knob.samplerSize]"} {"\[sample knob green p34.x p34.y knob.samplerSize knob.samplerSize]"} {"\[sample knob blue p34.x p34.y knob.samplerSize knob.samplerSize]"}}
+  addUserKnob {6 p34src_panelDropped l "panel dropped state" -STARTLINE +HIDDEN}
+  addUserKnob {12 p35}
+  p35 {{(((topright.x*3+bottomright.x*5)/8-(sqrt(pow(((topleft.x-topright.x)*3+(bottomleft.x-bottomright.x)*5)/8,2))/12*3))*9+3*((topleft.x*3+bottomleft.x*5)/8+(sqrt(pow(((topleft.x-topright.x)*3+(bottomleft.x-bottomright.x)*5)/8,2))/12*9)))/12} {((((topleft.y*3+topright.y*9)/12-(sqrt(pow(((topleft.y-bottomleft.y)*3+(topright.y+bottomright.y)*9)/12,2))/8*5))*3+5*((bottomleft.y*3+bottomright.y*9)/12+(sqrt(pow(((topleft.y-bottomleft.y)*3+(topright.y+bottomright.y)*9)/12,2))/8*3))))/8}}
+  addUserKnob {18 p35src -STARTLINE}
+  p35src {{"\[sample knob red p35.x p35.y knob.samplerSize knob.samplerSize]"} {"\[sample knob green p35.x p35.y knob.samplerSize knob.samplerSize]"} {"\[sample knob blue p35.x p35.y knob.samplerSize knob.samplerSize]"}}
+  addUserKnob {6 p35src_panelDropped l "panel dropped state" -STARTLINE +HIDDEN}
+  addUserKnob {12 p36}
+  p36 {{(((topright.x*3+bottomright.x*5)/8-(sqrt(pow(((topleft.x-topright.x)*3+(bottomleft.x-bottomright.x)*5)/8,2))/12*1))*11+1*((topleft.x*3+bottomleft.x*5)/8+(sqrt(pow(((topleft.x-topright.x)*3+(bottomleft.x-bottomright.x)*5)/8,2))/12*11)))/12} {((((topleft.y*1+topright.y*11)/12-(sqrt(pow(((topleft.y-bottomleft.y)*1+(topright.y+bottomright.y)*11)/12,2))/8*5))*3+5*((bottomleft.y*1+bottomright.y*11)/12+(sqrt(pow(((topleft.y-bottomleft.y)*1+(topright.y+bottomright.y)*11)/12,2))/8*3))))/8}}
+  addUserKnob {18 p36src -STARTLINE}
+  p36src {{"\[sample knob red p36.x p36.y knob.samplerSize knob.samplerSize]"} {"\[sample knob green p36.x p36.y knob.samplerSize knob.samplerSize]"} {"\[sample knob blue p36.x p36.y knob.samplerSize knob.samplerSize]"}}
+  addUserKnob {6 p36src_panelDropped l "panel dropped state" -STARTLINE +HIDDEN}
+  addUserKnob {26 ""}
+  addUserKnob {12 p41}
+  p41 {{(((topright.x*1+bottomright.x*7)/8-(sqrt(pow(((topleft.x-topright.x)*1+(bottomleft.x-bottomright.x)*7)/8,2))/12*11))*1+11*((topleft.x*1+bottomleft.x*7)/8+(sqrt(pow(((topleft.x-topright.x)*1+(bottomleft.x-bottomright.x)*7)/8,2))/12*1)))/12} {((((topleft.y*11+topright.y*1)/12-(sqrt(pow(((topleft.y-bottomleft.y)*11+(topright.y+bottomright.y)*1)/12,2))/8*7))*1+7*((bottomleft.y*11+bottomright.y*1)/12+(sqrt(pow(((topleft.y-bottomleft.y)*11+(topright.y+bottomright.y)*1)/12,2))/8*1))))/8}}
+  addUserKnob {18 p41src -STARTLINE}
+  p41src {{"\[sample knob red p41.x p41.y knob.samplerSize knob.samplerSize]"} {"\[sample knob green p41.x p41.y knob.samplerSize knob.samplerSize]"} {"\[sample knob blue p41.x p41.y knob.samplerSize knob.samplerSize]"}}
+  addUserKnob {6 p41src_panelDropped l "panel dropped state" -STARTLINE +HIDDEN}
+  addUserKnob {12 p42}
+  p42 {{(((topright.x*1+bottomright.x*7)/8-(sqrt(pow(((topleft.x-topright.x)*1+(bottomleft.x-bottomright.x)*7)/8,2))/12*9))*3+9*((topleft.x*1+bottomleft.x*7)/8+(sqrt(pow(((topleft.x-topright.x)*1+(bottomleft.x-bottomright.x)*7)/8,2))/12*3)))/12} {((((topleft.y*9+topright.y*3)/12-(sqrt(pow(((topleft.y-bottomleft.y)*9+(topright.y+bottomright.y)*3)/12,2))/8*7))*1+7*((bottomleft.y*9+bottomright.y*3)/12+(sqrt(pow(((topleft.y-bottomleft.y)*9+(topright.y+bottomright.y)*3)/12,2))/8*1))))/8}}
+  addUserKnob {18 p42src -STARTLINE}
+  p42src {{"\[sample knob red p42.x p42.y knob.samplerSize knob.samplerSize]"} {"\[sample knob green p42.x p42.y knob.samplerSize knob.samplerSize]"} {"\[sample knob blue p42.x p42.y knob.samplerSize knob.samplerSize]"}}
+  addUserKnob {6 p42src_panelDropped l "panel dropped state" -STARTLINE +HIDDEN}
+  addUserKnob {12 p43}
+  p43 {{(((topright.x*1+bottomright.x*7)/8-(sqrt(pow(((topleft.x-topright.x)*1+(bottomleft.x-bottomright.x)*7)/8,2))/12*7))*5+7*((topleft.x*1+bottomleft.x*7)/8+(sqrt(pow(((topleft.x-topright.x)*1+(bottomleft.x-bottomright.x)*7)/8,2))/12*5)))/12} {((((topleft.y*7+topright.y*5)/12-(sqrt(pow(((topleft.y-bottomleft.y)*7+(topright.y+bottomright.y)*5)/12,2))/8*7))*1+7*((bottomleft.y*7+bottomright.y*5)/12+(sqrt(pow(((topleft.y-bottomleft.y)*7+(topright.y+bottomright.y)*5)/12,2))/8*1))))/8}}
+  addUserKnob {18 p43src -STARTLINE}
+  p43src {{"\[sample knob red p43.x p43.y knob.samplerSize knob.samplerSize]"} {"\[sample knob green p43.x p43.y knob.samplerSize knob.samplerSize]"} {"\[sample knob blue p43.x p43.y knob.samplerSize knob.samplerSize]"}}
+  addUserKnob {6 p43src_panelDropped l "panel dropped state" -STARTLINE +HIDDEN}
+  addUserKnob {12 p44}
+  p44 {{(((topright.x*1+bottomright.x*7)/8-(sqrt(pow(((topleft.x-topright.x)*1+(bottomleft.x-bottomright.x)*7)/8,2))/12*5))*7+5*((topleft.x*1+bottomleft.x*7)/8+(sqrt(pow(((topleft.x-topright.x)*1+(bottomleft.x-bottomright.x)*7)/8,2))/12*7)))/12} {((((topleft.y*5+topright.y*7)/12-(sqrt(pow(((topleft.y-bottomleft.y)*5+(topright.y+bottomright.y)*7)/12,2))/8*7))*1+7*((bottomleft.y*5+bottomright.y*7)/12+(sqrt(pow(((topleft.y-bottomleft.y)*5+(topright.y+bottomright.y)*7)/12,2))/8*1))))/8}}
+  addUserKnob {18 p44src -STARTLINE}
+  p44src {{"\[sample knob red p44.x p44.y knob.samplerSize knob.samplerSize]"} {"\[sample knob green p44.x p44.y knob.samplerSize knob.samplerSize]"} {"\[sample knob blue p44.x p44.y knob.samplerSize knob.samplerSize]"}}
+  addUserKnob {6 p44src_panelDropped l "panel dropped state" -STARTLINE +HIDDEN}
+  addUserKnob {12 p45}
+  p45 {{(((topright.x*1+bottomright.x*7)/8-(sqrt(pow(((topleft.x-topright.x)*1+(bottomleft.x-bottomright.x)*7)/8,2))/12*3))*9+3*((topleft.x*1+bottomleft.x*7)/8+(sqrt(pow(((topleft.x-topright.x)*1+(bottomleft.x-bottomright.x)*7)/8,2))/12*9)))/12} {((((topleft.y*3+topright.y*9)/12-(sqrt(pow(((topleft.y-bottomleft.y)*3+(topright.y+bottomright.y)*9)/12,2))/8*7))*1+7*((bottomleft.y*3+bottomright.y*9)/12+(sqrt(pow(((topleft.y-bottomleft.y)*3+(topright.y+bottomright.y)*9)/12,2))/8*1))))/8}}
+  addUserKnob {18 p45src -STARTLINE}
+  p45src {{"\[sample knob red p45.x p45.y knob.samplerSize knob.samplerSize]"} {"\[sample knob green p45.x p45.y knob.samplerSize knob.samplerSize]"} {"\[sample knob blue p45.x p45.y knob.samplerSize knob.samplerSize]"}}
+  addUserKnob {6 p45src_panelDropped l "panel dropped state" -STARTLINE +HIDDEN}
+  addUserKnob {12 p46}
+  p46 {{(((topright.x*1+bottomright.x*7)/8-(sqrt(pow(((topleft.x-topright.x)*1+(bottomleft.x-bottomright.x)*7)/8,2))/12*1))*11+1*((topleft.x*1+bottomleft.x*7)/8+(sqrt(pow(((topleft.x-topright.x)*1+(bottomleft.x-bottomright.x)*7)/8,2))/12*11)))/12} {((((topleft.y*1+topright.y*11)/12-(sqrt(pow(((topleft.y-bottomleft.y)*1+(topright.y+bottomright.y)*11)/12,2))/8*7))*1+7*((bottomleft.y*1+bottomright.y*11)/12+(sqrt(pow(((topleft.y-bottomleft.y)*1+(topright.y+bottomright.y)*11)/12,2))/8*1))))/8}}
+  addUserKnob {18 p46src -STARTLINE}
+  p46src {{"\[sample knob red p46.x p46.y knob.samplerSize knob.samplerSize]"} {"\[sample knob green p46.x p46.y knob.samplerSize knob.samplerSize]"} {"\[sample knob blue p46.x p46.y knob.samplerSize knob.samplerSize]"}}
+  addUserKnob {6 p46src_panelDropped l "panel dropped state" -STARTLINE +HIDDEN}
+ }
+end_group

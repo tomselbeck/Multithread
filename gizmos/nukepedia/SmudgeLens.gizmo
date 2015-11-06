@@ -1,0 +1,746 @@
+#! C:/Program Files/Nuke8.0v5/nuke-8.0.v5.dll -nx
+version 8.0 v5
+Gizmo {
+ inputs 2
+ tile_color 0xffffffff
+ addUserKnob {20 User l SmudgeLens}
+ addUserKnob {6 outputparticles l "output shapes" +STARTLINE}
+ addUserKnob {41 seed l "random seed" T ParticleEmitter1.seed}
+ addUserKnob {41 rate l amount T ParticleEmitter1.rate}
+ addUserKnob {41 size T ParticleEmitter1.size}
+ addUserKnob {26 "" +STARTLINE}
+ addUserKnob {6 distortionenable l distortion -STARTLINE}
+ addUserKnob {41 sensor l "" -STARTLINE T RED_LensDistortion1.sensor}
+ addUserKnob {41 chooseFocal l "" -STARTLINE T RED_LensDistortion1.chooseFocal}
+ addUserKnob {26 "" +STARTLINE}
+ addUserKnob {6 effectonly l composite +STARTLINE}
+ effectonly true
+ addUserKnob {41 A l mask T ChannelMerge7.A}
+ addUserKnob {6 invertmask l invert -STARTLINE}
+ addUserKnob {7 opacity l mix}
+ opacity 1
+}
+ BackdropNode {
+  inputs 0
+  name BackdropNode1
+  tile_color 0x8e388e00
+  label downres
+  note_font_size 42
+  xpos -542
+  ypos -3008
+  bdwidth 201
+  bdheight 137
+ }
+ BackdropNode {
+  inputs 0
+  name BackdropNode2
+  tile_color 0x71c67100
+  label CA
+  note_font_size 42
+  xpos -616
+  ypos -384
+  bdwidth 222
+  bdheight 209
+ }
+ Input {
+  inputs 0
+  name mask
+  xpos -202
+  ypos -263
+ }
+ Invert {
+  name Invert1
+  xpos -202
+  ypos -50
+  disable {{1-invertmask}}
+ }
+ Dot {
+  name Dot33
+  xpos -168
+  ypos 71
+ }
+ Noise {
+  inputs 0
+  size 8.4
+  zoffset 1.26
+  lacunarity 4.25
+  gain 0.51
+  gamma 0.02
+  center {1024 540}
+  name Noise2
+  xpos -646
+  ypos -878
+ }
+ FilterErode {
+  channels rgba
+  size -0.9
+  filter quadratic
+  name FilterErode3
+  xpos -646
+  ypos -854
+ }
+ Blur {
+  size 11.4
+  name Blur4
+  xpos -646
+  ypos -830
+ }
+ Dot {
+  name Dot8
+  xpos -612
+  ypos -787
+ }
+ Noise {
+  inputs 0
+  type turbulence
+  size 32.5
+  gamma 1
+  center {1024 540}
+  name Noise1
+  xpos -650
+  ypos -1036
+ }
+ Dot {
+  name Dot3
+  xpos -616
+  ypos -940
+ }
+ Camera2 {
+  inputs 0
+  translate {0 0 1.580000043}
+  haperture 30.7
+  vaperture 16.18
+  frame_rate 25
+  name Camera1
+  xpos -1553
+  ypos -2479
+ }
+ Roto {
+  inputs 0
+  output alpha
+  cliptype none
+  curves {{{v x3f99999a}
+  {f 0}
+  {n
+   {layer Root
+    {f 512}
+    {t x44800000 x44070000}
+    {a}
+    {curvegroup Ellipse1 512 bezier
+     {{cc
+       {f 8192}
+       {px x447b0000
+        {0 0}
+        {x4454a3f8 x4381e4e0}
+        {0 0}
+        {0 0}
+        {x448c098d x43802cf4}
+        {0 0}
+        {0 0}
+        {x449f71fb x43e5d264}
+        {0 0}
+        {0 0}
+        {x4498e5c1 x4433857e}
+        {0 0}
+        {0 0}
+        {x4476e0ba x445516e0}
+        {0 0}
+        {0 0}
+        {x443bd4b0 x4436c3f4}
+        {0 0}
+        {0 0}
+        {x442b85d3 x43e6f5c8}
+        {0 0}}}     idem}
+     {tx x447b0000 x446b8000 x440ec000}
+     {a osw x41200000 osf 0 str 1 spx x44800000 spy x44070000 sb 1 ltn x447b0000 ltm x447b0000 tt x40e00000}}}}}}
+  toolbox {selectAll {
+  { selectAll str 1 ssx 1 ssy 1 sf 1 }
+  { createBezier str 1 ssx 1 ssy 1 sf 1 sb 1 tt 4 }
+  { createBezierCusped str 1 ssx 1 ssy 1 sf 1 sb 1 }
+  { createBSpline str 1 ssx 1 ssy 1 sf 1 sb 1 }
+  { createEllipse str 1 ssx 1 ssy 1 sf 1 sb 1 tt 7 }
+  { createRectangle str 1 ssx 1 ssy 1 sf 1 sb 1 }
+  { createRectangleCusped str 1 ssx 1 ssy 1 sf 1 sb 1 }
+  { addPoints str 1 ssx 1 ssy 1 sf 1 }
+  { brush str 1 ssx 1 ssy 1 sf 1 sb 1 }
+  { eraser src 2 str 1 ssx 1 ssy 1 sf 1 sb 1 }
+  { clone src 1 str 1 ssx 1 ssy 1 sf 1 sb 1 }
+  { reveal src 3 str 1 ssx 1 ssy 1 sf 1 sb 1 }
+  { dodge src 1 str 1 ssx 1 ssy 1 sf 1 sb 1 }
+  { burn src 1 str 1 ssx 1 ssy 1 sf 1 sb 1 }
+  { blur src 1 str 1 ssx 1 ssy 1 sf 1 sb 1 }
+  { sharpen src 1 str 1 ssx 1 ssy 1 sf 1 sb 1 }
+  { smear src 1 str 1 ssx 1 ssy 1 sf 1 sb 1 }
+} }
+  toolbar_brush_hardness 0.200000003
+  toolbar_source_transform_scale {1 1}
+  toolbar_source_transform_center {1024 540}
+  colorOverlay {0 0 0 0}
+  lifetime_type "all frames"
+  lifetime_start 1004
+  lifetime_end 1004
+  motionblur_shutter_offset_type centred
+  source_black_outside true
+  createNewTrack {{-1} "-1\t(none)\t-1" "1000\tNew Track Layer\t1000"}
+  name Roto3
+  xpos -1621
+  ypos -3163
+ }
+ Dot {
+  name Dot13
+  xpos -1587
+  ypos -2947
+ }
+set Nff5b5be0 [stack 0]
+ Dot {
+  name Dot20
+  xpos -1721
+  ypos -2947
+ }
+ FilterErode {
+  size 8
+  name FilterErode4
+  xpos -1755
+  ypos -2906
+ }
+ Dot {
+  name Dot18
+  xpos -1721
+  ypos -2849
+ }
+push $Nff5b5be0
+ ChannelMerge {
+  inputs 2
+  operation stencil
+  name ChannelMerge6
+  xpos -1624
+  ypos -2864
+ }
+ Shuffle {
+  red alpha
+  green alpha
+  blue alpha
+  name Shuffle2
+  xpos -1624
+  ypos -2784
+ }
+ Dot {
+  name Dot22
+  xpos -1590
+  ypos -2711
+ }
+push $Nff5b5be0
+ Dot {
+  name Dot21
+  xpos -1425
+  ypos -2947
+ }
+ Multiply {
+  value 0.18
+  name Multiply2
+  xpos -1459
+  ypos -2805
+ }
+ Merge2 {
+  inputs 2
+  mix 0.615
+  name Merge2
+  xpos -1459
+  ypos -2714
+ }
+ Card2 {
+  inputs 0
+  image_aspect false
+  uniform_scale 2
+  control_points {3 3 3 6 
+
+1 {-0.5 -0.5 0} 0 {0.1666666865 0 0} 0 {0 0 0} 0 {0 0.1666666865 0} 0 {0 0 0} 0 {0 0 0} 
+1 {0 -0.5 0} 0 {0.1666666716 0 0} 0 {-0.1666666716 0 0} 0 {0 0.1666666865 0} 0 {0 0 0} 0 {0.5 0 0} 
+1 {0.5 -0.5 0} 0 {0 0 0} 0 {-0.1666666865 0 0} 0 {0 0.1666666865 0} 0 {0 0 0} 0 {1 0 0} 
+1 {-0.5 0 0} 0 {0.1666666865 0 0} 0 {0 0 0} 0 {0 0.1666666716 0} 0 {0 -0.1666666716 0} 0 {0 0.5 0} 
+1 {0 0 0} 0 {0.1666666716 0 0} 0 {-0.1666666716 0 0} 0 {0 0.1666666716 0} 0 {0 -0.1666666716 0} 0 {0.5 0.5 0} 
+1 {0.5 0 0} 0 {0 0 0} 0 {-0.1666666865 0 0} 0 {0 0.1666666716 0} 0 {0 -0.1666666716 0} 0 {1 0.5 0} 
+1 {-0.5 0.5 0} 0 {0.1666666865 0 0} 0 {0 0 0} 0 {0 0 0} 0 {0 -0.1666666865 0} 0 {0 1 0} 
+1 {0 0.5 0} 0 {0.1666666716 0 0} 0 {-0.1666666716 0 0} 0 {0 0 0} 0 {0 -0.1666666865 0} 0 {0.5 1 0} 
+1 {0.5 0.5 0} 0 {0 0 0} 0 {-0.1666666865 0 0} 0 {0 0 0} 0 {0 -0.1666666865 0} 0 {1 1 0} }
+  name Card1
+  xpos -1330
+  ypos -2591
+ }
+push 0
+ ParticleEmitter {
+  inputs 3
+  display textured
+  start_frame 1.5
+  emit_from faces
+  randomize_type "randomized direction"
+  rate 15
+  selection_threshhold 0.315
+  rate_variation 0.265
+  velocity 0.031
+  velocity_variation 0.21
+  rotation_velocity 0.044
+  size 0.12
+  size_variation 1
+  seed 37
+  name ParticleEmitter1
+  xpos -1459
+  ypos -2591
+ }
+ FrameHold {
+  first_frame 12  name FrameHold1
+  xpos -1459
+  ypos -2552
+ }
+push 0
+ ScanlineRender {
+  inputs 3
+  overscan 50
+  motion_vectors_type distance
+  MB_channel none
+  drop_zero_alpha_samples false
+  name ScanlineRender1
+  xpos -1459
+  ypos -2458
+ }
+ RED_LensDistortion {
+  name RED_LensDistortion1
+  label "\[value chooseFocal]mm\\n\[value direction]"
+  xpos -1459
+  ypos -2410
+  disable {{1-parent.distortionenable}}
+  chooseFocal 32
+  direction Distort
+ }
+ Dot {
+  name Dot9
+  xpos -1425
+  ypos -2319
+ }
+set N666681e0 [stack 0]
+ Dot {
+  name Dot2
+  xpos -1425
+  ypos -2254
+ }
+set Nea77a480 [stack 0]
+ Dot {
+  name Dot10
+  xpos -1656
+  ypos -2254
+ }
+ FilterErode {
+  size 6
+  filter gaussian
+  name FilterErode1
+  xpos -1690
+  ypos -2188
+ }
+ Blur {
+  size 62.5
+  name Blur3
+  xpos -1690
+  ypos -2126
+ }
+ Grade {
+  channels alpha
+  black -0.145
+  name Grade2
+  xpos -1690
+  ypos -2045
+ }
+ Dot {
+  name Dot11
+  xpos -1656
+  ypos -1967
+ }
+push $Nea77a480
+ Blur {
+  size 15.2
+  name Blur1
+  xpos -1459
+  ypos -2130
+ }
+ ChannelMerge {
+  inputs 2
+  operation from
+  name ChannelMerge1
+  xpos -1459
+  ypos -1982
+ }
+ Dot {
+  name Dot12
+  xpos -1425
+  ypos -1799
+ }
+set Nea7634b0 [stack 0]
+ Input {
+  inputs 0
+  name InputSource
+  xpos -484
+  ypos -3200
+  number 1
+ }
+ Dot {
+  name Dot29
+  xpos -450
+  ypos -3103
+ }
+set Ne1ff1fa0 [stack 0]
+ Remove {
+  operation keep
+  channels rgb
+  name Remove1
+  xpos -484
+  ypos -3038
+ }
+ Grade {
+  name Grade9
+  xpos -484
+  ypos -3001
+ }
+ Blocky {
+  size 6
+  name Blocky1
+  xpos -484
+  ypos -2930
+ }
+ Dot {
+  name Dot7
+  xpos -450
+  ypos -2699
+ }
+set Nea7777d0 [stack 0]
+ Dot {
+  name Dot6
+  xpos -724
+  ypos -2699
+ }
+ Keyer {
+  operation "luminance key"
+  range {0.1382793364 0.1382793364 4 4}
+  name Keyer1
+  xpos -758
+  ypos -2643
+ }
+ FilterErode {
+  size -44
+  filter gaussian
+  name FilterErode2
+  xpos -758
+  ypos -2607
+ }
+ Grade {
+  channels alpha
+  gamma 0.76
+  name Grade6
+  xpos -758
+  ypos -2571
+ }
+ Dot {
+  name Dot5
+  xpos -724
+  ypos -2505
+ }
+push $Nea7777d0
+ Defocus {
+  defocus 100
+  quality 4
+  name Defocus1
+  xpos -484
+  ypos -2658
+ }
+ ColorCorrect {
+  midtones.gain 4
+  highlights.gain 4
+  lookup {shadow {curve 1 s0 x0.0288602896 0 s0}
+    midtone {1-shadow-highlight}
+    highlight {}}
+  name ColorCorrect1
+  xpos -484
+  ypos -2609
+ }
+ Multiply {
+  value 2.08
+  name Multiply1
+  xpos -484
+  ypos -2585
+ }
+ Grade {
+  inputs 1+1
+  white 2.16
+  mix 0.095
+  name Grade1
+  xpos -484
+  ypos -2508
+ }
+set N34886fd0 [stack 0]
+ Dot {
+  name Dot26
+  xpos -246
+  ypos -2505
+ }
+ Blur {
+  size 200
+  quality 4
+  name Blur5
+  xpos -280
+  ypos -2461
+ }
+ Dot {
+  name Dot25
+  xpos -246
+  ypos -2399
+ }
+push $N34886fd0
+ Merge2 {
+  inputs 2
+  operation max
+  name Merge1
+  xpos -484
+  ypos -2402
+ }
+ Blur {
+  size 40
+  quality 5
+  name Blur2
+  xpos -484
+  ypos -2346
+ }
+ Grade {
+  black 0.008
+  name Grade4
+  xpos -484
+  ypos -2273
+ }
+ Dot {
+  name Dot15
+  xpos -450
+  ypos -2080
+ }
+set N34893e10 [stack 0]
+ Dot {
+  name Dot16
+  xpos -708
+  ypos -2080
+ }
+ Shuffle {
+  red blue
+  green blue
+  name Shuffle1
+  xpos -742
+  ypos -2018
+ }
+ Grade {
+  black 0.115
+  white 3.34
+  gamma 1.16
+  mix 0.8
+  name Grade3
+  xpos -742
+  ypos -1951
+ }
+ Dot {
+  name Dot4
+  xpos -708
+  ypos -1891
+ }
+ ChannelMerge {
+  inputs 2
+  A rgba.red
+  operation plus
+  name ChannelMerge2
+  xpos -742
+  ypos -1814
+ }
+push $Nea7634b0
+ Dot {
+  name Dot14
+  xpos -1425
+  ypos -1454
+ }
+ ChannelMerge {
+  inputs 2
+  A rgba.red
+  operation multiply
+  name ChannelMerge3
+  xpos -742
+  ypos -1469
+ }
+ Dot {
+  name Dot1
+  xpos -708
+  ypos -1158
+ }
+push $N34893e10
+ Copy {
+  inputs 2
+  from0 rgba.alpha
+  to0 rgba.alpha
+  name Copy1
+  xpos -485
+  ypos -1167
+ }
+ ChannelMerge {
+  inputs 2
+  operation multiply
+  mix 0.455
+  name ChannelMerge4
+  xpos -485
+  ypos -955
+ }
+ ChannelMerge {
+  inputs 2
+  operation from
+  mix 0.06
+  name ChannelMerge5
+  xpos -485
+  ypos -802
+ }
+ RedDragonGrain {
+  name RedDragonGrain1
+  xpos -485
+  ypos -593
+  red_m 0.67
+  green_m 0.65
+  blue_m 0.655
+  lut {master {}
+    red {curve C x0.002537812106 0.5574626923 x0.01500128955 0.3532619178 S x0.05672120303 0.1188675174 s-1.090957761 C k x0.1263013631 0.08333853601 s0}
+    green {curve C x0.0001555439085 0.6 s-22 x0.03511571884 0.1854373515 s-5.800000191 k x0.09460556507 0.03198983964 s0 l x1 0.01567173004}
+    blue {curve C 0.7 x0.04970749468 0.1689054966 s-1.600000024 x0.3959880173 0.03208959103 s-0.05000000075 x1 0.01840806007}
+    alpha {}}
+  alpha -rgba.alpha
+ }
+ Premult {
+  name Premult1
+  xpos -484
+  ypos -304
+ }
+set N2d783b20 [stack 0]
+ Dot {
+  name Dot19
+  xpos -572
+  ypos -301
+ }
+ Transform {
+  scale 1.003
+  center {1024 540}
+  name Transform1
+  xpos -606
+  ypos -252
+ }
+ Dot {
+  name Dot17
+  xpos -572
+  ypos -206
+ }
+push $N2d783b20
+ Copy {
+  inputs 2
+  from0 rgba.green
+  to0 rgba.green
+  name Copy2
+  xpos -484
+  ypos -215
+ }
+push $N666681e0
+ Dot {
+  name Dot23
+  xpos -1835
+  ypos -2319
+ }
+ Shuffle {
+  red alpha
+  green alpha
+  blue alpha
+  name Shuffle3
+  xpos -1869
+  ypos -2178
+ }
+ Dot {
+  name Dot24
+  xpos -1835
+  ypos -14
+ }
+ Switch {
+  inputs 2
+  which {{1-parent.outputparticles}}
+  name Switch1
+  xpos -484
+  ypos -17
+ }
+set Nd02e3c10 [stack 0]
+ ChannelMerge {
+  inputs 2
+  operation stencil
+  name ChannelMerge7
+  xpos -484
+  ypos 56
+ }
+ Multiply {
+  value {{parent.opacity}}
+  name Multiply3
+  xpos -484
+  ypos 158
+  addUserKnob {20 User}
+ }
+ Dot {
+  name Dot31
+  xpos -450
+  ypos 213
+ }
+set Ne1ff29f0 [stack 0]
+push $Ne1ff29f0
+ Dot {
+  name Dot32
+  xpos -336
+  ypos 213
+ }
+push $Ne1ff1fa0
+ Dot {
+  name Dot28
+  xpos -32
+  ypos -3103
+ }
+ Dot {
+  name Dot27
+  xpos -32
+  ypos 272
+ }
+ Merge2 {
+  inputs 2
+  name Merge3
+  xpos -370
+  ypos 269
+ }
+ Dot {
+  name Dot30
+  xpos -336
+  ypos 363
+ }
+ Switch {
+  inputs 2
+  which {{1-parent.effectonly}}
+  name Switch2
+  xpos -484
+  ypos 360
+ }
+ Crop {
+  box {0 0 2048 1080}
+  name Crop1
+  xpos -484
+  ypos 455
+ }
+ Output {
+  name Output2
+  xpos -484
+  ypos 479
+ }
+push $Nd02e3c10
+ Viewer {
+  input_process false
+  name Viewer1
+  xpos -1174
+  ypos -2139
+ }
+end_group

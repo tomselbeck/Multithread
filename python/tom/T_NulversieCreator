@@ -1,0 +1,20 @@
+import os
+import T_DictionaryCreator
+from T_DictionaryCreator import *
+
+
+
+serv = "Z:/projects/"
+project = "PipelineDev/"
+editorial = "editorial/"
+plates ="plates/"
+nulversie = "nulversie/"
+lastpublish ="lastpublish/"
+sequences = "sequences/"
+fslash = "/"
+
+CreateDictionary()
+
+
+for x in xrange(0,shotcount):
+    print shotdir[x]

@@ -1,0 +1,126 @@
+set cut_paste_input [stack 0]
+version 8.0 v5
+BackdropNode {
+ inputs 0
+ name BackdropNode24
+ tile_color 0xaaaaaa00
+ note_font_size 42
+ selected true
+ xpos 984
+ ypos 7459
+ bdwidth 314
+ bdheight 495
+}
+Axis2 {
+ inputs 0
+ translate {8.467781067 1.993950605 5.967677116}
+ name Axis1
+ tile_color 0xffc304ff
+ selected true
+ xpos 1004
+ ypos 7818
+}
+push $cut_paste_input
+Dot {
+ name Dot47
+ label CAM
+ note_font_size 40
+ selected true
+ xpos 1133
+ ypos 7539
+}
+Dot {
+ name Dot48
+ selected true
+ xpos 1133
+ ypos 7737
+}
+set N7b78f630 [stack 0]
+Dot {
+ name Dot70
+ selected true
+ xpos 1133
+ ypos 7923
+}
+set N7b78f9a0 [stack 0]
+push 0
+Reconcile3D {
+ inputs 3
+ name Reconcile3D1
+ selected true
+ xpos 994
+ ypos 7914
+}
+Axis2 {
+ inputs 0
+ translate {8.467782021 1.993950605 -5.129140854}
+ name Axis2
+ tile_color 0xffc304ff
+ selected true
+ xpos 1218
+ ypos 7817
+}
+push $N7b78f9a0
+push 0
+Reconcile3D {
+ inputs 3
+ name Reconcile3D2
+ selected true
+ xpos 1208
+ ypos 7914
+}
+Axis2 {
+ inputs 0
+ translate {14.97195625 32.19104004 -5.129140854}
+ name Axis3
+ tile_color 0xffc304ff
+ selected true
+ xpos 1218
+ ypos 7631
+}
+push $N7b78f630
+push 0
+Reconcile3D {
+ inputs 3
+ name Reconcile3D4
+ selected true
+ xpos 1208
+ ypos 7728
+}
+Axis2 {
+ inputs 0
+ translate {14.9719553 32.19104004 5.967677116}
+ name Axis4
+ tile_color 0xffc304ff
+ selected true
+ xpos 1006
+ ypos 7632
+}
+push $N7b78f630
+push 0
+Reconcile3D {
+ inputs 3
+ name Reconcile3D3
+ selected true
+ xpos 996
+ ypos 7728
+}
+CornerPin2D {
+ inputs 0
+ to1 {{parent.Reconcile3D1.output} {parent.Reconcile3D1.output}}
+ to2 {{parent.Reconcile3D2.output} {parent.Reconcile3D2.output}}
+ to3 {{parent.Reconcile3D4.output} {parent.Reconcile3D4.output}}
+ to4 {{parent.Reconcile3D3.output} {parent.Reconcile3D3.output}}
+ invert false
+ from1 {{to1(refFrame)} {to1(refFrame)}}
+ from2 {{to2(refFrame)} {to2(refFrame)}}
+ from3 {{to3(refFrame)} {to3(refFrame)}}
+ from4 {{to4(refFrame)} {to4(refFrame)}}
+ name CornerPin2D1
+ selected true
+ xpos 1110
+ ypos 8043
+ addUserKnob {20 User}
+ addUserKnob {3 refFrame}
+ refFrame 1001
+}

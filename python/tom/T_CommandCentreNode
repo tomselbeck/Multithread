@@ -1,0 +1,17 @@
+set cut_paste_input [stack 0]
+version 9.0 v5
+push $cut_paste_input
+NoOp {
+ name pipeline
+ label "Command Center "
+ note_font "Showcard Gothic"
+ note_font_size 20
+ selected true
+ xpos -225
+ ypos -35
+ addUserKnob {20 User}
+ addUserKnob {4 pchoice l "Project keuze: " M {PipelineDev Debug "" "" ""}}
+ pchoice Debug
+ addUserKnob {32 test T "print (pipeline.pchoice)\n" +STARTLINE}
+ addUserKnob {22 UpdateTimeline l "Copy new publishes" T "import os\nimport T_DictionaryCreator\nimport shutil\nfrom T_DictionaryCreator import *\n\n\nshotdir = \{\}\nshotcount = 0\nproject = \"PipelineDev/\"\nserv = \"Z:/projects/\"\neditorial = \"editorial/\"\nplates =\"plates/\"\nnulversie = \"nulversie/\"\nlastpublish =\"lastpublish/\"\nnull = \"null//\"\nsequences = \"sequences/\"\nComp = \"Comp/\"\ncomp = \"comp/\"\npublish = \"publish/\"\nelements = \"elements/\"\nfslash = \"/\"\nresolution = \"/1920x1080/\"\n\n## Call directory to create shotlist\n\nCreateDictionary(project,shotdir,shotcount)\nshotcount = CreateDictionary(project,shotdir,shotcount)\n\n\nprint (\"\")\nprint (\"\")\nprint (\"\")\nprint (\"\")\n\n\n#print shotdir\n#print shotcount\n \n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n##################################################\n\n# Copy and rename the latest versions to null\nprint (\"\")\nprint (\"Next Section : Copy the latest publishes to Null folder and rename them\")\nprint (\"\")\n##################################################\n\n\n\n\nfor x in xrange(0,shotcount):\n    \n    ## Calculate the latest version #\n    vpath = serv+project+sequences+shotdir\[x]\[0]+fslash+shotdir\[x]\[1]+fslash+Comp+publish+elements+comp\n    if os.path.exists(vpath) == True: \n        v = max(os.listdir(vpath))\n        print v \n    else:\n        print (\"Shot has no publishes, copying raw plates\")\n    #print shotdir\[x]\[0],shotdir\[x]\[1]        \n    ## folder to look for published shots\n    sourcedir = serv+project+sequences+shotdir\[x]\[0]+fslash+shotdir\[x]\[1]+fslash+Comp+publish+elements+comp+v+resolution\n    destdir = serv+project+editorial+nulversie+null+shotdir\[x]\[0]+fslash+shotdir\[x]\[1]+fslash\n    #print (sourcedir)\n    \n\n\n    ## List all filenames \n    for dirName, subdirList, fileList in os.walk(sourcedir):\n        print('Found directory: %s' % dirName)\n        sw = True;\n        \n        for fname in fileList:\n            sourcefilename =('%s' % fname)   \n\n\n            \n            ## Create new filepaths and replace version numbers to 0's\n            destfilename = sourcefilename.replace(\"%s\" %v , \"v000\")\n            destdir = destdir.replace(\"%s\" %v , \"v000\")\n            \n            \n            \n            ## Create folders       \n            if os.path.exists(destdir) == False:\n                print (\"Destination folder does not yet exist, Creating folder: %s\" %destdir)\n                os.makedirs (destdir)\n            else:\n                \n            \n            ## Copy file warning\n            if sw==True:\n                print (\"Copying files from %s\" %sourcedir, \"to %s\" %destdir) \n                sw=False   \n            shutil.copy(sourcedir+sourcefilename,destdir+destfilename)\n\n        \n\n         \n    #sourcefilename=\n    #destdir=\n    #destfilename=\n\n\n    \n\n" +STARTLINE}
+}
