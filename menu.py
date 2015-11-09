@@ -15,9 +15,12 @@ import T_twtswitch
 bar2016.addCommand("TimeWillTell/Switch_to_server", "T_twtswitch.server()")
 bar2016.addCommand("TimeWillTell/Switch_to_local", "T_twtswitch.local()")
 
-import T_NulversieCreator
-bar2016.addCommand("PipelineTools/Update Nulsversie/Project: PipelineDev", "T_NulversieCreator.PipelineDev()")
+#import T_NulversieCreator
+bar2016.addCommand("PipelineTools/Import NulversieExporter", "import T_NulversieCreator")
+bar2016.addCommand("PipelineTools/Update Nulversie/Project: PipelineDev", "T_NulversieCreator.PipelineDev()")
+
 ## Custom Gizmos
+
 
 
 

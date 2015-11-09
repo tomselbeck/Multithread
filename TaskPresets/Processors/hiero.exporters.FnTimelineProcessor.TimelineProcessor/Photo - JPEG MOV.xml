@@ -1,5 +1,5 @@
 <root presetname="Photo - JPEG MOV" tasktype="hiero.exporters.FnTimelineProcessor.TimelineProcessor">
-    <exportTemplate valuetype="tuple">
+    <exportTemplate valuetype="list">
         <SequenceItem valuetype="tuple">
             <SequenceItem valuetype="str">{sequence}_{version}/{sequence}_{version}.{ext}</SequenceItem>
             <SequenceItem valuetype="hiero.exporters.FnTranscodeExporter.TranscodePreset">

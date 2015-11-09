@@ -1,5 +1,5 @@
 <root presetname="Final Cut Pro 7 XML" tasktype="hiero.exporters.FnTimelineProcessor.TimelineProcessor">
-    <exportTemplate valuetype="list">
+    <exportTemplate valuetype="tuple">
         <SequenceItem valuetype="tuple">
             <SequenceItem valuetype="str">{sequence}/{sequence}.xml</SequenceItem>
             <SequenceItem valuetype="hiero.exporters.FnXMLExportTask.XMLExportPreset">

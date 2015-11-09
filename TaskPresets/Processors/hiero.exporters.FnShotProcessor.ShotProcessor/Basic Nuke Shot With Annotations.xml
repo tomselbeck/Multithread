@@ -4,7 +4,7 @@
     <versionIndex valuetype="int">1</versionIndex>
     <cutUseHandles valuetype="bool">False</cutUseHandles>
     <versionPadding valuetype="int">2</versionPadding>
-    <exportTemplate valuetype="list">
+    <exportTemplate valuetype="tuple">
         <SequenceItem valuetype="tuple">
             <SequenceItem valuetype="str">{shot}/nuke/script/{shot}_comp{_nameindex}_{version}.{ext}</SequenceItem>
             <SequenceItem valuetype="hiero.exporters.FnNukeShotExporter.NukeShotPreset">
@@ -77,7 +77,7 @@
                     <collateShotNames valuetype="bool">False</collateShotNames>
                     <includeEffects valuetype="bool">True</includeEffects>
                     <writePaths valuetype="list">
-                        <SequenceItem valuetype="str">{shot}_comp_annotations_{version}.####.{ext}</SequenceItem>
+                        <SequenceItem valuetype="str">{shot}/nuke/annotations/{shot}_comp_annotations_{version}.####.{ext}</SequenceItem>
                     </writePaths>
                     <collateTracks valuetype="bool">False</collateTracks>
                     <method valuetype="str">Blend</method>
@@ -85,7 +85,7 @@
             </SequenceItem>
         </SequenceItem>
         <SequenceItem valuetype="tuple">
-            <SequenceItem valuetype="str">{shot}_comp_annotations_{version}.####.{ext}</SequenceItem>
+            <SequenceItem valuetype="str">{shot}/nuke/annotations/{shot}_comp_annotations_{version}.####.{ext}</SequenceItem>
             <SequenceItem valuetype="hiero.exporters.FnExternalRender.NukeRenderPreset">
                 <root presetname="" tasktype="hiero.exporters.FnExternalRender.NukeRenderTask">
                     <burninDataEnabled valuetype="bool">False</burninDataEnabled>

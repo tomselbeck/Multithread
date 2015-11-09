@@ -1,0 +1,51 @@
+<root presetname="Jpeg MOV TWT1" tasktype="hiero.exporters.FnTimelineProcessor.TimelineProcessor">
+    <exportTemplate valuetype="list">
+        <SequenceItem valuetype="tuple">
+            <SequenceItem valuetype="str">{sequence}_{DD}_{MM}/{sequence}_{DD}_{MM}.{ext}</SequenceItem>
+            <SequenceItem valuetype="hiero.exporters.FnTranscodeExporter.TranscodePreset">
+                <root presetname="" tasktype="hiero.exporters.FnTranscodeExporter.TranscodeExporter">
+                    <colourspace valuetype="unicode">default</colourspace>
+                    <file_type valuetype="str">mov</file_type>
+                    <mov valuetype="dict">
+                        <dnxhd_codec_profile valuetype="unicode">DNxHD 422 8-bit 36Mbit</dnxhd_codec_profile>
+                        <b_frames valuetype="int">0</b_frames>
+                        <codec valuetype="str">jpeg&#x09;Photo - JPEG</codec>
+                        <encoder valuetype="str">mov64</encoder>
+                    </mov>
+                    <channels valuetype="unicode">all</channels>
+                    <burninDataEnabled valuetype="bool">True</burninDataEnabled>
+                    <additionalNodesEnabled valuetype="bool">False</additionalNodesEnabled>
+                    <additionalNodesData valuetype="list" />
+                    <burninData valuetype="dict">
+                        <burnIn_bottomRight valuetype="NoneType">None</burnIn_bottomRight>
+                        <burnIn_topLeft valuetype="unicode" />
+                        <burnIn_topMiddle valuetype="unicode">{sequence}</burnIn_topMiddle>
+                        <burnIn_padding valuetype="NoneType">None</burnIn_padding>
+                        <burnIn_topRight valuetype="unicode">{clip}</burnIn_topRight>
+                        <burnIn_bottomMiddle valuetype="unicode">[frame]</burnIn_bottomMiddle>
+                        <burnIn_bottomLeft valuetype="unicode">{sequence}_{shot}</burnIn_bottomLeft>
+                        <burnIn_textSize valuetype="float">25.0</burnIn_textSize>
+                        <burnIn_font valuetype="str">A:\02_projects\03_twt\04_NukeStudio02\London-Tube.ttf</burnIn_font>
+                    </burninData>
+                    <writeNodeName valuetype="str">Write_{ext}</writeNodeName>
+                    <reformat valuetype="dict">
+                        <pixelAspect valuetype="float">1.0</pixelAspect>
+                        <name valuetype="str">HD_1080</name>
+                        <to_type valuetype="unicode">to format</to_type>
+                        <height valuetype="int">1080</height>
+                        <width valuetype="int">1920</width>
+                        <resize valuetype="unicode">width</resize>
+                    </reformat>
+                    <keepNukeScript valuetype="bool">False</keepNukeScript>
+                    <method valuetype="unicode">Blend</method>
+                </root>
+            </SequenceItem>
+        </SequenceItem>
+    </exportTemplate>
+    <startFrameIndex valuetype="int">1</startFrameIndex>
+    <exportRoot valuetype="str">A:/02_projects/03_twt/02_editorial/04_to_edit/</exportRoot>
+    <versionIndex valuetype="int">1</versionIndex>
+    <startFrameSource valuetype="str">Sequence</startFrameSource>
+    <versionPadding valuetype="int">2</versionPadding>
+    <inOutTrim valuetype="bool">True</inOutTrim>
+</root>

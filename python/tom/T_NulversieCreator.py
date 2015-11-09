@@ -2,6 +2,9 @@ import os
 import T_DictionaryCreator
 import shutil
 import T_LogCreator
+import T_MovExporter
+
+
 
 from T_DictionaryCreator import *
 
@@ -10,12 +13,16 @@ from T_DictionaryCreator import *
 
 def PipelineDev():
 
-    project = "PipelineDev/"
+    project = "PipelineDev"
     Null(project)
+        ## Update the logs 
+    print ("")
+    T_LogCreator.log(project)
+    T_MovExporter.Export(project)
     pass
 
 
-## Uitvoering ##  
+## Copying Files, Updating Log ##  
 
 
 def Null(project):
@@ -23,8 +30,9 @@ def Null(project):
 
 
 
-
-
+    projectname = project
+    project = project + "/"
+    print project
 
     shotdir = {}
     shotcount = 0
@@ -42,7 +50,7 @@ def Null(project):
     fslash = "/"
     resolution = "/1920x1080/"
 
-    logname = project[0:len(project)-1] + "_Database.txt"
+    logname = projectname + "_Database.txt"
     logpath = serv+project+editorial+nulversie+logname
 
     ## Call directory to create shotlist
@@ -160,9 +168,7 @@ def Null(project):
         #destdir=
         #destfilename=
 
-    ## Update the logs 
-    print ("")
-    T_LogCreator.log(project)
+
 
     pass
 
