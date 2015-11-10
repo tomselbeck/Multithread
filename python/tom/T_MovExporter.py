@@ -17,6 +17,7 @@ def Export(project):
         #preset = next(preset for preset in
     presetName = 'VFX_2016_NulExporter'+'_'+project
 
+
     preset = next(preset for preset in
         hiero.core.taskRegistry.localPresets() if preset.name() == presetName)
 
@@ -43,6 +44,12 @@ def Export(project):
             # Do the export
             hiero.core.taskRegistry.createAndExecuteProcessor(preset, exportItems,synchronous=False)
 
+            presetName2 = 'VFX_2016_NulShotExporter'+'_'+project
+
+            preset = next(preset for preset in
+                hiero.core.taskRegistry.localPresets() if preset.name() == presetName2)
+
+            hiero.core.taskRegistry.createAndExecuteProcessor(preset, exportItems,synchronous=False)
 
             pass
         x = x+1

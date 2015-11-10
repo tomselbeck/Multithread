@@ -16,6 +16,7 @@ def PipelineDev():
     project = "PipelineDev"
     resolution = "/1920x1080/"
     Null(project,resolution)
+    T_LogCreator.log(project)
     T_MovExporter.Export(project)
     pass
 
@@ -23,6 +24,7 @@ def Eigen():
     project = "Eigen"
     resolution = "/1920x1080/"
     Null(project,resolution)
+    T_LogCreator.log(project)
     T_MovExporter.Export(project)
     pass
 
@@ -30,7 +32,7 @@ def DarkMachine():
     project = "DarkMachine"
     resolution = "/1920x1080/"
     Null(project,resolution)
-
+    T_LogCreator.log(project)
     T_MovExporter.Export(project)
     pass
 
@@ -39,7 +41,7 @@ def Kropsdam():
     project = "Kropsdam"
     resolution = "/1920x1080/"
     Null(project,resolution)
-
+    T_LogCreator.log(project)
     T_MovExporter.Export(project)
     pass
 
@@ -49,7 +51,7 @@ def Infinity():
     project = "Infinity"
     resolution = "/1920x1080/"
     Null(project,resolution)
-
+    T_LogCreator.log(project)
     T_MovExporter.Export(project)
     pass              
 
@@ -213,6 +215,6 @@ def Null(project,resolution):
 
 
 ## TestScript
-#project = "PipelineDev"
-#resolution = "/1920x1080/"
-#Null(project,resolution)
+project = "PipelineDev"
+resolution = "/1920x1080/"
+Null(project,resolution)

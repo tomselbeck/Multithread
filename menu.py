@@ -18,6 +18,13 @@ bar2016.addCommand("TimeWillTell/Switch_to_local", "T_twtswitch.local()")
 #import T_NulversieCreator
 bar2016.addCommand("PipelineTools/Import NulversieExporter", "import T_NulversieCreator")
 bar2016.addCommand("PipelineTools/Update Nulversie/Project: PipelineDev", "T_NulversieCreator.PipelineDev()")
+bar2016.addCommand("PipelineTools/Update Nulversie/Project: Eigen", "T_NulversieCreator.Eigen()")
+bar2016.addCommand("PipelineTools/Update Nulversie/Project: DarkMachine", "T_NulversieCreator.DarkMachine()")
+bar2016.addCommand("PipelineTools/Update Nulversie/Project: Kropsdam", "T_NulversieCreator.Kropsdam()")
+bar2016.addCommand("PipelineTools/Update Nulversie/Project: Infinity", "T_NulversieCreator.Infinity()")
+bar2016.addCommand("PipelineTools/Update Nulversie/Project: Trouble", "T_NulversieCreator.Trouble()")
+bar2016.addCommand("PipelineTools/Update Nulversie/Project: Mechanic", "T_NulversieCreator.Mechanic()")
+
 
 ## Custom Gizmos
 

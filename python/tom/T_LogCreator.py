@@ -94,6 +94,6 @@ def log(project):
 
 
     pass
-project = ("PipelineDev")
-log(project)
+#project = ("PipelineDev")
+#log(project)
 

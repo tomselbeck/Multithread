@@ -6,7 +6,7 @@ import os
 def CreateDictionary(project,shotdir,shotcount):
     
 
-
+    project = project + "/"
     serv = "Z:/projects/"
     #project = "PipelineDev/"
     editorial = "editorial/"
@@ -67,6 +67,7 @@ def CreateDictionary(project,shotdir,shotcount):
             length =  len(os.walk(lookpath).next()[2])
             # Add to shot dictionary
             shotdir [shotcount]  = seqs[x],shots[i],length+1000
+            print shotdir[shotcount]
             shotcount = shotcount + 1
 
  
@@ -82,6 +83,9 @@ def CreateDictionary(project,shotdir,shotcount):
     pass
 
 
-
-
+##### TEST SCRIPT 
+#project = "PipelineDev"
+#shotdir = {}
+#shotcount = 0
+#CreateDictionary(project,shotdir,shotcount)
 
