@@ -140,6 +140,15 @@ import DeadlineNukeClient
 menubar = nuke.menu("Nuke")
 tbmenu = menubar.addMenu("&Thinkbox")
 tbmenu.addCommand("Submit Nuke To Deadline", DeadlineNukeClient.main, "")
+#This is done to only add the Frame Server in Nuke Studio.
+#Try-except is for older versions of Nuke.
+try:
+    if nuke.env[ 'studio' ]:
+        import DeadlineNukeFrameServerClient
+        tbmenu.addCommand("Reserve Frame Server Slaves",
+            DeadlineNukeFrameServerClient.main, "")
+except:
+    pass
 
 
 

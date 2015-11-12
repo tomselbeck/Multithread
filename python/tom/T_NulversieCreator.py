@@ -51,8 +51,15 @@ def Infinity():
     Null(project,resolution)
 
     T_MovExporter.Export(project)
-    pass              
+    pass
 
+def Trouble():
+    project = "Trouble"
+    resolution = "/1920x1080/"
+    Null(project,resolution)
+
+    T_MovExporter.Export(project)
+    pass     
 
 def Null(project,resolution):
 

@@ -1,7 +1,7 @@
-<root presetname="Avid DNxHD Codec TWT" tasktype="hiero.exporters.FnTimelineProcessor.TimelineProcessor">
+<root presetname="VFX_2016_NulExporter_Infinity" tasktype="hiero.exporters.FnTimelineProcessor.TimelineProcessor">
     <exportTemplate valuetype="list">
         <SequenceItem valuetype="tuple">
-            <SequenceItem valuetype="str">{sequence}_{version}.{ext}</SequenceItem>
+            <SequenceItem valuetype="str">nulversie_{project}_{day}_{DD}_{MM}_{YYYY}_{hour24}{minute}.{ext}</SequenceItem>
             <SequenceItem valuetype="hiero.exporters.FnTranscodeExporter.TranscodePreset">
                 <root presetname="" tasktype="hiero.exporters.FnTranscodeExporter.TranscodeExporter">
                     <colourspace valuetype="unicode">default</colourspace>
@@ -19,34 +19,35 @@
                         <SequenceItem valuetype="tuple">
                             <SequenceItem valuetype="unicode">Sequence</SequenceItem>
                             <SequenceItem valuetype="list" />
-                            <SequenceItem valuetype="unicode">Group {&#x0A; name Group1&#x0A; label HighConceptLogo&#x0A; selected true&#x0A;}&#x0A; Read {&#x0A;  inputs 0&#x0A;  file A:/02_projects/03_twt/04_NukeStudio02/high_concept_films_logo_banner_zw_600x100.png&#x0A;  format &quot;640 66 0 0 640 66 1 &quot;&#x0A;  origset true&#x0A;  name Read1&#x0A; }&#x0A; Shuffle {&#x0A;  red alpha&#x0A;  green alpha&#x0A;  blue alpha&#x0A;  name Shuffle2&#x0A; }&#x0A; Transform {&#x0A;  translate {24.5 2068}&#x0A;  name Transform4&#x0A; }&#x0A; Input {&#x0A;  inputs 0&#x0A;  name Input1&#x0A; }&#x0A; Merge2 {&#x0A;  inputs 2&#x0A;  name Merge4&#x0A; }&#x0A;set N4196800 [stack 0]&#x0A; Viewer {&#x0A;  frame_range 1-303&#x0A;  name Viewer1&#x0A; }&#x0A;push $N4196800&#x0A; Output {&#x0A;  name Output1&#x0A; }&#x0A;end_group</SequenceItem>
+                            <SequenceItem valuetype="unicode">Group {&#x0A; name Group1&#x0A; label &quot;Logo: Eigen&quot;&#x0A; selected true&#x0A;}&#x0A; Read {&#x0A;  inputs 0&#x0A;  file A:/02_projects/03_twt/04_NukeStudio02/high_concept_films_logo_banner_zw_600x100.png&#x0A;  format &quot;640 66 0 0 640 66 1 &quot;&#x0A;  origset true&#x0A;  name Read1&#x0A; }&#x0A; Input {&#x0A;  inputs 0&#x0A;  name Input1&#x0A; }&#x0A;set N71652000 [stack 0]&#x0A; Viewer {&#x0A;  frame 1013&#x0A;  frame_range 1001-1030&#x0A;  name Viewer1&#x0A; }&#x0A; Read {&#x0A;  inputs 0&#x0A;  file Z:/pipeline/nuke/ShotSlates/logos/eigen/eigen_shotgun.png&#x0A;  format &quot;850 315 0 0 850 315 1 &quot;&#x0A;  origset true&#x0A;  name Read3&#x0A; }&#x0A; Premult {&#x0A;  name Premult1&#x0A; }&#x0A; Shuffle {&#x0A;  red alpha&#x0A;  green alpha&#x0A;  blue alpha&#x0A;  name Shuffle2&#x0A; }&#x0A; Transform {&#x0A;  translate {539.5999756 -134.3999939}&#x0A;  scale 0.19&#x0A;  center {399 153}&#x0A;  name Transform4&#x0A; }&#x0A;push $N71652000&#x0A; Merge2 {&#x0A;  inputs 2&#x0A;  name Merge4&#x0A; }&#x0A; Output {&#x0A;  name Output1&#x0A; }&#x0A;end_group</SequenceItem>
                         </SequenceItem>
                         <SequenceItem valuetype="tuple">
                             <SequenceItem valuetype="unicode">Shot</SequenceItem>
                             <SequenceItem valuetype="list">
                                 <SequenceItem valuetype="unicode">VFX</SequenceItem>
                             </SequenceItem>
-                            <SequenceItem valuetype="unicode">Crop {&#x0A; preset 2.35:1&#x0A; box {0 157 4096 2003}&#x0A; name Crop1&#x0A; selected true&#x0A;}</SequenceItem>
+                            <SequenceItem valuetype="unicode">Group {&#x0A; name Group1&#x0A; label &quot;Logo: Eigen&quot;&#x0A; selected true&#x0A;}&#x0A; Read {&#x0A;  inputs 0&#x0A;  file A:/02_projects/03_twt/04_NukeStudio02/high_concept_films_logo_banner_zw_600x100.png&#x0A;  format &quot;640 66 0 0 640 66 1 &quot;&#x0A;  origset true&#x0A;  name Read1&#x0A; }&#x0A; Input {&#x0A;  inputs 0&#x0A;  name Input1&#x0A; }&#x0A;set N71652000 [stack 0]&#x0A; Viewer {&#x0A;  frame 1013&#x0A;  frame_range 1001-1030&#x0A;  name Viewer1&#x0A; }&#x0A; Read {&#x0A;  inputs 0&#x0A;  file Z:/pipeline/nuke/ShotSlates/logos/eigen/eigen_shotgun.png&#x0A;  format &quot;850 315 0 0 850 315 1 &quot;&#x0A;  origset true&#x0A;  name Read3&#x0A; }&#x0A; Premult {&#x0A;  name Premult1&#x0A; }&#x0A; Shuffle {&#x0A;  red alpha&#x0A;  green alpha&#x0A;  blue alpha&#x0A;  name Shuffle2&#x0A; }&#x0A; Transform {&#x0A;  translate {539.5999756 -134.3999939}&#x0A;  scale 0.19&#x0A;  center {399 153}&#x0A;  name Transform4&#x0A; }&#x0A;push $N71652000&#x0A; Merge2 {&#x0A;  inputs 2&#x0A;  name Merge4&#x0A; }&#x0A; Output {&#x0A;  name Output1&#x0A; }&#x0A;end_group</SequenceItem>
                         </SequenceItem>
                     </additionalNodesData>
                     <burninData valuetype="dict">
                         <burnIn_bottomRight valuetype="NoneType">None</burnIn_bottomRight>
                         <burnIn_topLeft valuetype="unicode" />
-                        <burnIn_topMiddle valuetype="unicode">{sequence}</burnIn_topMiddle>
-                        <burnIn_padding valuetype="NoneType">None</burnIn_padding>
+                        <burnIn_topMiddle valuetype="unicode">[frame]</burnIn_topMiddle>
+                        <burnIn_padding valuetype="int">10</burnIn_padding>
                         <burnIn_topRight valuetype="unicode">{clip}</burnIn_topRight>
-                        <burnIn_textSize valuetype="float">25.0</burnIn_textSize>
+                        <burnIn_bottomMiddle valuetype="unicode" />
                         <burnIn_bottomLeft valuetype="unicode">{sequence}_{shot}</burnIn_bottomLeft>
-                        <burnIn_bottomMiddle valuetype="unicode">[frame]</burnIn_bottomMiddle>
+                        <burnIn_textSize valuetype="float">20.0</burnIn_textSize>
                         <burnIn_font valuetype="str">A:\02_projects\03_twt\04_NukeStudio02\London-Tube.ttf</burnIn_font>
                     </burninData>
                     <writeNodeName valuetype="str">Write_{ext}</writeNodeName>
                     <reformat valuetype="dict">
                         <pixelAspect valuetype="float">1.0</pixelAspect>
                         <name valuetype="str">HD_1080</name>
-                        <width valuetype="int">1920</width>
-                        <height valuetype="int">1080</height>
                         <to_type valuetype="unicode">to format</to_type>
+                        <height valuetype="int">1080</height>
+                        <width valuetype="int">1920</width>
+                        <scale valuetype="float">1.0</scale>
                         <resize valuetype="unicode">width</resize>
                     </reformat>
                     <keepNukeScript valuetype="bool">False</keepNukeScript>
@@ -56,7 +57,7 @@
         </SequenceItem>
     </exportTemplate>
     <startFrameIndex valuetype="int">1</startFrameIndex>
-    <exportRoot valuetype="str">C:/Users/t.selbeck/Dropbox/archief/04_vfx/03_projecten/02_TWT_trailer/02_client_io/01_For_Approval/</exportRoot>
+    <exportRoot valuetype="str">Z:/Projects/Infinity/editorial/nulversie/exports/sequence/</exportRoot>
     <versionIndex valuetype="int">1</versionIndex>
     <startFrameSource valuetype="str">Sequence</startFrameSource>
     <versionPadding valuetype="int">2</versionPadding>

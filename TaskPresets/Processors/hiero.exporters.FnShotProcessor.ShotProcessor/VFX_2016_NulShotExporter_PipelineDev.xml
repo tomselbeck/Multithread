@@ -1,0 +1,69 @@
+<root presetname="VFX_2016_NulShotExporter_PipelineDev" tasktype="hiero.exporters.FnShotProcessor.ShotProcessor">
+    <startFrameIndex valuetype="int">1001</startFrameIndex>
+    <exportRoot valuetype="str">Z:/Projects/PipelineDev/editorial/nulversie/exports/shots/</exportRoot>
+    <versionIndex valuetype="int">1</versionIndex>
+    <cutUseHandles valuetype="bool">False</cutUseHandles>
+    <versionPadding valuetype="int">2</versionPadding>
+    <exportTemplate valuetype="list">
+        <SequenceItem valuetype="tuple">
+            <SequenceItem valuetype="str">{track}_{shot}.{ext}</SequenceItem>
+            <SequenceItem valuetype="hiero.exporters.FnTranscodeExporter.TranscodePreset">
+                <root presetname="" tasktype="hiero.exporters.FnTranscodeExporter.TranscodeExporter">
+                    <colourspace valuetype="unicode">rec709</colourspace>
+                    <file_type valuetype="unicode">mov</file_type>
+                    <mov valuetype="dict">
+                        <dnxhd_codec_profile valuetype="unicode">DNxHD 422 8-bit 220Mbit</dnxhd_codec_profile>
+                        <codec valuetype="str">AVdn&#x09;Avid DNxHD Codec</codec>
+                        <encoder valuetype="str">mov64</encoder>
+                    </mov>
+                    <channels valuetype="unicode">rgb</channels>
+                    <burninDataEnabled valuetype="bool">True</burninDataEnabled>
+                    <additionalNodesEnabled valuetype="bool">True</additionalNodesEnabled>
+                    <additionalNodesData valuetype="list">
+                        <SequenceItem valuetype="tuple">
+                            <SequenceItem valuetype="unicode">Sequence</SequenceItem>
+                            <SequenceItem valuetype="list" />
+                            <SequenceItem valuetype="unicode">Group {&#x0A; name Group1&#x0A; label &quot;Logo: Eigen&quot;&#x0A; selected true&#x0A;}&#x0A; Read {&#x0A;  inputs 0&#x0A;  file A:/02_projects/03_twt/04_NukeStudio02/high_concept_films_logo_banner_zw_600x100.png&#x0A;  format &quot;640 66 0 0 640 66 1 &quot;&#x0A;  origset true&#x0A;  name Read1&#x0A; }&#x0A; Input {&#x0A;  inputs 0&#x0A;  name Input1&#x0A; }&#x0A;set N71652000 [stack 0]&#x0A; Viewer {&#x0A;  frame 1013&#x0A;  frame_range 1001-1030&#x0A;  name Viewer1&#x0A; }&#x0A; Read {&#x0A;  inputs 0&#x0A;  file Z:/pipeline/nuke/ShotSlates/logos/eigen/eigen_shotgun.png&#x0A;  format &quot;850 315 0 0 850 315 1 &quot;&#x0A;  origset true&#x0A;  name Read3&#x0A; }&#x0A; Premult {&#x0A;  name Premult1&#x0A; }&#x0A; Shuffle {&#x0A;  red alpha&#x0A;  green alpha&#x0A;  blue alpha&#x0A;  name Shuffle2&#x0A; }&#x0A; Transform {&#x0A;  translate {539.5999756 -134.3999939}&#x0A;  scale 0.19&#x0A;  center {399 153}&#x0A;  name Transform4&#x0A; }&#x0A;push $N71652000&#x0A; Merge2 {&#x0A;  inputs 2&#x0A;  name Merge4&#x0A; }&#x0A; Output {&#x0A;  name Output1&#x0A; }&#x0A;end_group</SequenceItem>
+                        </SequenceItem>
+                        <SequenceItem valuetype="tuple">
+                            <SequenceItem valuetype="unicode">Shot</SequenceItem>
+                            <SequenceItem valuetype="list" />
+                            <SequenceItem valuetype="unicode">Group {&#x0A; name Group1&#x0A; label &quot;Logo: Eigen&quot;&#x0A; selected true&#x0A;}&#x0A; Read {&#x0A;  inputs 0&#x0A;  file A:/02_projects/03_twt/04_NukeStudio02/high_concept_films_logo_banner_zw_600x100.png&#x0A;  format &quot;640 66 0 0 640 66 1 &quot;&#x0A;  origset true&#x0A;  name Read1&#x0A; }&#x0A; Input {&#x0A;  inputs 0&#x0A;  name Input1&#x0A; }&#x0A;set N71652000 [stack 0]&#x0A; Viewer {&#x0A;  frame 1013&#x0A;  frame_range 1001-1030&#x0A;  name Viewer1&#x0A; }&#x0A; Read {&#x0A;  inputs 0&#x0A;  file Z:/pipeline/nuke/ShotSlates/logos/eigen/eigen_shotgun.png&#x0A;  format &quot;850 315 0 0 850 315 1 &quot;&#x0A;  origset true&#x0A;  name Read3&#x0A; }&#x0A; Premult {&#x0A;  name Premult1&#x0A; }&#x0A; Shuffle {&#x0A;  red alpha&#x0A;  green alpha&#x0A;  blue alpha&#x0A;  name Shuffle2&#x0A; }&#x0A; Transform {&#x0A;  translate {539.5999756 -134.3999939}&#x0A;  scale 0.19&#x0A;  center {399 153}&#x0A;  name Transform4&#x0A; }&#x0A;push $N71652000&#x0A; Merge2 {&#x0A;  inputs 2&#x0A;  name Merge4&#x0A; }&#x0A; Output {&#x0A;  name Output1&#x0A; }&#x0A;end_group</SequenceItem>
+                        </SequenceItem>
+                    </additionalNodesData>
+                    <dpx valuetype="dict">
+                        <datatype valuetype="str">10 bit</datatype>
+                    </dpx>
+                    <burninData valuetype="dict">
+                        <burnIn_bottomRight valuetype="unicode">{timecode}</burnIn_bottomRight>
+                        <burnIn_topLeft valuetype="unicode" />
+                        <burnIn_topMiddle valuetype="unicode">[frame]</burnIn_topMiddle>
+                        <burnIn_padding valuetype="int">10</burnIn_padding>
+                        <burnIn_topRight valuetype="unicode">{clip}</burnIn_topRight>
+                        <burnIn_bottomMiddle valuetype="unicode" />
+                        <burnIn_bottomLeft valuetype="unicode">{sequence}_{shot}</burnIn_bottomLeft>
+                        <burnIn_textSize valuetype="float">20.0</burnIn_textSize>
+                        <burnIn_font valuetype="str">Z:/pipeline/nuke/font/London-Tube.ttf</burnIn_font>
+                    </burninData>
+                    <writeNodeName valuetype="str">Write_{ext}</writeNodeName>
+                    <reformat valuetype="dict">
+                        <pixelAspect valuetype="float">1.0</pixelAspect>
+                        <name valuetype="str">HD_1080</name>
+                        <to_type valuetype="unicode">to format</to_type>
+                        <height valuetype="int">1080</height>
+                        <width valuetype="int">1920</width>
+                        <resize valuetype="unicode">width</resize>
+                    </reformat>
+                    <keepNukeScript valuetype="bool">False</keepNukeScript>
+                    <method valuetype="str">Blend</method>
+                </root>
+            </SequenceItem>
+        </SequenceItem>
+    </exportTemplate>
+    <excludeTags valuetype="list" />
+    <includeTags valuetype="list" />
+    <includeRetimes valuetype="bool">False</includeRetimes>
+    <startFrameSource valuetype="str">Source</startFrameSource>
+    <cutLength valuetype="bool">False</cutLength>
+    <cutHandles valuetype="int">12</cutHandles>
+</root>
