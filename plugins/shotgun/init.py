@@ -9,7 +9,7 @@
 
 SGTK_STUDIO_LOCATION_LINUX   = "/mnt/software/shotgun/studio"
 SGTK_STUDIO_LOCATION_MAC     = "/mnt/software/shotgun/studio"
-SGTK_STUDIO_LOCATION_WINDOWS = "z:\\Projects"
+SGTK_STUDIO_LOCATION_WINDOWS = "C:\\Program Files\\Shotgun\\Resources\\Python\\tk-framework-desktopstartup\\python\\tk-core\setup\\sgtk\\"
 
 # Tell the script where the project root is located. 
 # This location will be used if no .nk file is specified on the command line

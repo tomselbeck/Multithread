@@ -33,7 +33,7 @@ nuke.pluginAddPath( path + 'python/nukepedia')
 nuke.pluginAddPath( path + 'plugins')
 nuke.pluginAddPath( path + 'plugins/3DEqualizer')
 
-##nuke.pluginAddPath( path + 'plugins/shotgun')
+nuke.pluginAddPath( path + 'plugins/shotgun')
 
 nuke.pluginAddPath( path + 'plugins/Trapcode')
 nuke.pluginAddPath( path + 'TaskPresets')

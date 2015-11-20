@@ -28,7 +28,7 @@ def CreateDictionary(project,shotdir,shotcount):
     print ("Running: dictionary Creator")
 
     #rint ("Creating dictionary for following Path:")
-    lookpath = serv + project + editorial + plates
+    lookpath = serv + project + sequences
     #print lookpath
     #print ("")
     # List the sequence folders  #
@@ -51,7 +51,7 @@ def CreateDictionary(project,shotdir,shotcount):
 
     # for every sequence 
     for x in xrange(0,len(seqs)):
-        lookpath = serv + project + editorial + plates + seqs[x] + fslash
+        lookpath = serv + project + sequences + seqs[x] + fslash
         #print lookpath
         # List the shot folders  
         shots = os.listdir(lookpath)
@@ -60,7 +60,7 @@ def CreateDictionary(project,shotdir,shotcount):
         # For every shot 
         for i in xrange(0,len(shots)):
             shotlist.extend(shots)
-            lookpath = lookpath = serv + project + editorial + plates + seqs [x] + fslash + shots [i]
+            lookpath = lookpath = serv + project + sequences +  seqs [x] + fslash + shots [i]
             #print lookpath
             #print shots[i]
             # Check the shot lenth 

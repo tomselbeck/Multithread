@@ -81,6 +81,7 @@ gizmoToolbar.addCommand("RealChromaticAberration", "nuke.createNode('RealChromat
 gizmoToolbar.addCommand("TX_Fog", "nuke.createNode('TX_Fog')", icon='fog.png')
 gizmoToolbar.addCommand("VectorExtendEdge", "nuke.createNode('VectorExtendEdge')", icon='EdgeExtend.png')
 gizmoToolbar.addCommand("RealCamShake", "nuke.createNode('RealCamShake')", icon="shake.png")
+gizmoToolbar.addCommand("ExpressionWaveGenerator", "nuke.createNode('ExpressionWaveGenerator')", icon='chromab.png')
 
 
 #-------------------------------------------------------------------------------------------------------------------------------------------------------------

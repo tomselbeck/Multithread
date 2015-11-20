@@ -37,9 +37,11 @@ src.append ( os.path.abspath("Z:\\pipeline\\nuke\\TaskPresets\\Processors\\hiero
 src.append ( os.path.abspath("Z:\\pipeline\\nuke\\TaskPresets\\Processors\\hiero.exporters.FnTimelineProcessor.TimelineProcessor\\VFX_2016_NulExporter_Infinity.xml"))
 src.append ( os.path.abspath("Z:\\pipeline\\nuke\\TaskPresets\\Processors\\hiero.exporters.FnTimelineProcessor.TimelineProcessor\\VFX_2016_NulExporter_Trouble.xml"))
 
-print ("Copy from")
-print src
-print ("To")
+#print ("Copy from")
+#print src
+#print ("To")
+olddest = dest
+dest = dest + "\.nuke\TaskPresets\Processors\hiero.exporters.FnShotProcessor.ShotProcessor"  
 
 dest2.append ( dest + "\\VFX_2016_AUTO_PLATE_EXPORT.xml")
 dest2.append ( dest + "\\VFX_2016_NulShotExporter_Eigen.xml")
@@ -48,12 +50,12 @@ dest2.append ( dest + "\\VFX_2016_NulShotExporter_DarkMachine.xml")
 dest2.append ( dest + "\\VFX_2016_NulShotExporter_Infinity.xml")
 dest2.append ( dest + "\\VFX_2016_NulShotExporter_Trouble.xml")
 
-
+olddest = dest + "\.nuke\TaskPresets\Processors\hiero.exporters.FnTimelineProcessor.TimelineProcessor"  
 dest2.append ( dest + "\\VFX_2016_NulExporter_Eigen.xml")
 dest2.append ( dest + "\\VFX_2016_NulExporter_Mechnanic.xml")
 dest2.append ( dest + "\\VFX_2016_NulExporter_DarkMachine.xml")
 dest2.append ( dest + "\\VFX_2016_NulExporter_Infinity.xml")
-dest2.append ( dest + "\\VFX_2016_NultExporter_Trouble.xml")
+#dest2.append ( dest + "\\VFX_2016_NultExporter_Trouble.xml")
 print dest2
 
 
