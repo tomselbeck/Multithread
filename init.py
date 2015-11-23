@@ -1,6 +1,6 @@
 ## Sync NukeStudio presets 
 
-execfile('Z:\\pipeline\\nuke\\python\\tom\\T_NukeStudioPresets.py')
+#execfile('Z:\\pipeline\\nuke\\python\\tom\\T_NukeStudioPresets.py')
 
 
 

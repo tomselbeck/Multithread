@@ -54,6 +54,15 @@ def Infinity():
     #T_MovExporter.Export(project)
     pass
 
+
+def Mechanic():
+    project = "Mechanic"
+    resolution = "/1920x1080/"
+    Null(project,resolution)
+
+    #T_MovExporter.Export(project)
+    pass
+
 def Trouble():
     project = "Trouble"
     resolution = "/1920x1080/"
@@ -245,8 +254,8 @@ def Null(project,resolution):
                     #destfilename = name.replace("%s" %vtest , "v000")
                     destdir = destdir.replace("%s" %vtest , "v000")
                     ## check if there is a nullfile
-                    print name 
-                    print destfilename
+                    print "checking " + name 
+
                     if os.path.exists(destdir+destfilename) == False:
                         print ('No file Exists, creating file: %s' %name)
                         shutil.copy(sourcedir+name,destdir+destfilename) 
@@ -257,6 +266,8 @@ def Null(project,resolution):
                             print ('File already existst, updating file: %s' %name)
                             shutil.copy(sourcedir+name,destdir+destfilename) 
                             pass
+                        else:
+                            print "File is up to date"
 
 
                       
@@ -282,7 +293,7 @@ def Null(project,resolution):
 
 
         else:
-            #print ("Shot has no publishes, Doing Nothing")
+            print ("Shot has no publishes, Doing Nothing")
             pass
 
 
@@ -298,7 +309,15 @@ def Null(project,resolution):
     pass
 
 
-#TestScript
-#project = "Infinity"
-#resolution = "/1920x1080/"
-#Null(project,resolution)
+
+
+
+
+Infinity()
+Eigen()
+PipelineDev()
+DarkMachine()
+Mechanic()
+Kropsdam()
+Trouble()
+

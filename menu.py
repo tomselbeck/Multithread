@@ -12,11 +12,14 @@ menubar = nuke.menu("Nuke")
 bar2016 = menubar.addMenu("vfx 2016 :)")
 ## Custom scripts ##
 import T_twtswitch
+import T_AutoExport
+
 bar2016.addCommand("TimeWillTell/Switch_to_server", "T_twtswitch.server()")
 bar2016.addCommand("TimeWillTell/Switch_to_local", "T_twtswitch.local()")
 
 #import T_NulversieCreator
 bar2016.addCommand("PipelineTools/Import NulversieExporter", "import T_NulversieCreator")
+bar2016.addCommand("PipelineTools/Auto Export", "T_AutoExport.run()")
 bar2016.addCommand("PipelineTools/Update Nulversie/Project: PipelineDev", "T_NulversieCreator.PipelineDev()")
 bar2016.addCommand("PipelineTools/Update Nulversie/Project: Eigen", "T_NulversieCreator.Eigen()")
 bar2016.addCommand("PipelineTools/Update Nulversie/Project: DarkMachine", "T_NulversieCreator.DarkMachine()")
