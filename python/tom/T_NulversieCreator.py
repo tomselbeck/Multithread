@@ -246,12 +246,7 @@ def Null(project,resolution):
                             #print shotdir[x][0],shotdir[x][1]        
                         ## folder to look for published shots
 
-                    print "DEBUG"
-                    print ext
-                    print elementtest
-                    print v
-                    print resolution
-                    print "End of debug"
+
                     sourcedir = serv+project+sequences+shotdir[x][0]+fslash+shotdir[x][1]+fslash+Comp+publish+elements+elementtest+fslash+v+ext+resolution
                     # walkdir = sourcedir = serv+project+sequences+shotdir[x][0]+fslash+shotdir[x][1]+fslash+Comp+publish+elements+elementtest+fslash+ext+resolution
                     walkdir = sourcedir
@@ -262,7 +257,7 @@ def Null(project,resolution):
 
                     for root, dirs, files in os.walk(walkdir, topdown=False):
                         for name in files:
-                            print name
+                            
                             if not os.path.exists(destdir):
                                 os.makedirs(destdir)
                                 print 'destdir does not exist, creating destination folder'
@@ -273,17 +268,23 @@ def Null(project,resolution):
                             destdir = destdir.replace("%s" %vtest , "v000")
                             ## check if there is a nullfile
                             print name 
-                            print destfilename
+                            
                             if os.path.exists(destdir+destfilename) == False:
-                                print ('No file Exists, creating file: %s' %name)
-                                #shutil.copy(sourcedir+name,destdir+destfilename) 
+                                print ('No file Exists, creating file: %s' %destfilename)
+                                print  "Hij staat uit kreng"
+                                shutil.copy(sourcedir+name,destdir+destfilename) 
                                 pass
                             else:
                                 ## Check if the file is the same, if not, copy the newer file.
+
+
                                 if filecmp.cmp(sourcedir+name,destdir+destfilename) == False:
-                                    print ('File already existst, updating file: %s' %name)
-                                    #shutil.copy(sourcedir+name,destdir+destfilename) 
+                                    print ('File already existst, updating file: %s' %destfilename)
+                                    
+                                    shutil.copy(sourcedir+name,destdir+destfilename) 
                                     pass
+                                else:
+                                    print ('End')
                 pass
             pass
 
@@ -328,6 +329,6 @@ def Null(project,resolution):
 
 
 # #TestScript
-# project = "PipelineDev"
-# resolution = "/1920x1080/"
-# Null(project,resolution)
+project = "PipelineDev"
+resolution = "/1920x1080/"
+Null(project,resolution)
