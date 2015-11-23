@@ -262,7 +262,14 @@ def Null(project,resolution):
                                 os.makedirs(destdir)
                                 print 'destdir does not exist, creating destination folder'
                             ## Create the new file name for the nullversion file
-                            destfilename = shotdir[x][1] + name[(len(name)-9):len(name)]
+
+                            ## Change the extension
+                            if ext == 'jpeg/':
+                                destfilename = shotdir[x][1] + name[(len(name)-10):len(name)]
+                                pass
+                            if ext == 'dpx/':
+                                destfilename = shotdir[x][1] + name[(len(name)-9):len(name)]
+                                pass
                             destfilename = destfilename.replace("_","")
                             #destfilename = name.replace("%s" %vtest , "v000")
                             destdir = destdir.replace("%s" %vtest , "v000")
@@ -271,7 +278,7 @@ def Null(project,resolution):
                             
                             if os.path.exists(destdir+destfilename) == False:
                                 print ('No file Exists, creating file: %s' %destfilename)
-                                print  "Hij staat uit kreng"
+                                
                                 shutil.copy(sourcedir+name,destdir+destfilename) 
                                 pass
                             else:
@@ -285,7 +292,8 @@ def Null(project,resolution):
                                     pass
                                 else:
                                     print 'Frame is synced'
-                        
+                                    print destfilename
+                            print ""
 
                 pass
             pass
@@ -331,6 +339,17 @@ def Null(project,resolution):
 
 
 # #TestScript
-project = "PipelineDev"
-resolution = "/1920x1080/"
-Null(project,resolution)
+# project = "PipelineDev"
+# resolution = "/1920x1080/"
+# Null(project,resolution)
+
+###########
+#Autorun
+##########
+Infinity()
+Eigen()
+PipelineDev()
+#DarkMachine()
+#Mechanic()
+#Kropsdam()
+#Trouble()
