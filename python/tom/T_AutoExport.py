@@ -1,6 +1,6 @@
 
 def run():
-	from hiero.core import *
+	#from hiero.core import *
 	import T_NulversieCreator
 	T_NulversieCreator.PipelineDev()
 	T_NulversieCreator.Eigen
@@ -10,3 +10,5 @@ def run():
 	T_NulversieCreator.Trouble()
 	T_NulversieCreator.Mechanic()
 	pass
+
+run()
