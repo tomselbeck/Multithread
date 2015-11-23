@@ -224,6 +224,7 @@ def Null(project,resolution):
             for item in extlist:
                 ext = item
                 print 'checking for ' + ext
+                print ""
 
 
                 ## Change the resolution variable 
@@ -232,11 +233,9 @@ def Null(project,resolution):
                 resolutionTestPath = serv+project+sequences+shotdir[x][0]+fslash+shotdir[x][1]+fslash+Comp+publish+elements+elementtest+fslash+v+ext
                 if os.path.exists(resolutionTestPath):
                     resolution = os.listdir(resolutionTestPath)
-                    print 'debug2'
-                    print resolution
-                    print 'end debug2'
+
                     resolution = str(resolution[0]) + fslash
-                    print resolution
+
 
 
 
@@ -251,9 +250,10 @@ def Null(project,resolution):
                     # walkdir = sourcedir = serv+project+sequences+shotdir[x][0]+fslash+shotdir[x][1]+fslash+Comp+publish+elements+elementtest+fslash+ext+resolution
                     walkdir = sourcedir
                     destdir = serv+project+editorial+nulversie+null+ext+shotdir[x][0]+fslash+shotdir[x][1]+fslash
+                    print ""
                     print 'sourcedir:'+sourcedir
                     print 'destdir:'+ destdir            
-                    
+                    print ""
 
                     for root, dirs, files in os.walk(walkdir, topdown=False):
                         for name in files:
@@ -267,7 +267,7 @@ def Null(project,resolution):
                             #destfilename = name.replace("%s" %vtest , "v000")
                             destdir = destdir.replace("%s" %vtest , "v000")
                             ## check if there is a nullfile
-                            print name 
+                            print 'Checking frame :' + name
                             
                             if os.path.exists(destdir+destfilename) == False:
                                 print ('No file Exists, creating file: %s' %destfilename)
@@ -284,7 +284,9 @@ def Null(project,resolution):
                                     shutil.copy(sourcedir+name,destdir+destfilename) 
                                     pass
                                 else:
-                                    print ('End')
+                                    print 'Frame is synced'
+                        
+
                 pass
             pass
 
