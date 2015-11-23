@@ -89,7 +89,7 @@ def Null(project,resolution):
     lastpublish ="lastpublish/"
     null = "null/"
     sequences = "sequences/"
-
+    extlist = ['dpx/','jpeg/']
     publish = "publish/"
     elements = "elements/"
     fslash = "/"
@@ -151,6 +151,7 @@ def Null(project,resolution):
     for x in xrange(0,shotcount):
        
         ## Detect Task veriabel 01
+
         if os.path.exists(serv+project+sequences+shotdir[x][0]+fslash+shotdir[x][1]+fslash):
             temp = os.listdir(serv+project+sequences+shotdir[x][0]+fslash+shotdir[x][1]+fslash)
             for item in temp:
@@ -161,7 +162,7 @@ def Null(project,resolution):
 
                 #print "TEST"
             
-            #print Comp
+            
             pass
 
         # ## Detect Publish type veriabel 01
@@ -186,13 +187,14 @@ def Null(project,resolution):
         if os.path.exists(serv+project+sequences+shotdir[x][0]+fslash+shotdir[x][1]+fslash+Comp+publish+elements):
             elementtest = os.listdir(serv+project+sequences+shotdir[x][0]+fslash+shotdir[x][1]+fslash+Comp+publish+elements)
             if not elementtest:
-                print "List is empty"
-                print elementtest
+               
                 elementtest = "EMPTY"
+                print 'cant find elementtest, result:' + elementtest
             else:
-                print "List is NOT empty"
+                
                 elementtest = str(elementtest[0])
                 print elementtest
+                print 'Found an element!:' + elementtest
             pass
        
         
@@ -217,47 +219,73 @@ def Null(project,resolution):
             v = v + fslash
             ## Pick the newest version
             print v
-            ## Change the resolution variable 
 
-            ## Detect the resolution ##
-            resolution = os.listdir(serv+project+sequences+shotdir[x][0]+fslash+shotdir[x][1]+fslash+Comp+publish+elements+elementtest+fslash+v)
-            resolution = str(resolution[0]) + fslash
-            print resolution
+            ## for boyth JPEG and DPX ##
+            for item in extlist:
+                ext = item
+                print 'checking for ' + ext
 
-                #print shotdir[x][0],shotdir[x][1]        
-            ## folder to look for published shots
-            print elementtest
-            sourcedir = serv+project+sequences+shotdir[x][0]+fslash+shotdir[x][1]+fslash+Comp+publish+elements+elementtest+fslash+v+resolution
-            walkdir = sourcedir = serv+project+sequences+shotdir[x][0]+fslash+shotdir[x][1]+fslash+Comp+publish+elements+elementtest+fslash+v+resolution
-            destdir = serv+project+editorial+nulversie+null+shotdir[x][0]+fslash+shotdir[x][1]+fslash
-            print sourcedir
-            print destdir            
-            
 
-            for root, dirs, files in os.walk(walkdir, topdown=False):
-                for name in files:
+                ## Change the resolution variable 
 
-                    if not os.path.exists(destdir):
-                        os.makedirs(destdir)
-                    ## Create the new file name for the nullversion file
-                    destfilename = shotdir[x][1] + name[(len(name)-9):len(name)]
-                    destfilename = destfilename.replace("_","")
-                    #destfilename = name.replace("%s" %vtest , "v000")
-                    destdir = destdir.replace("%s" %vtest , "v000")
-                    ## check if there is a nullfile
-                    print name 
-                    print destfilename
-                    if os.path.exists(destdir+destfilename) == False:
-                        print ('No file Exists, creating file: %s' %name)
-                        shutil.copy(sourcedir+name,destdir+destfilename) 
-                        pass
-                    else:
-                        ## Check if the file is the same, if not, copy the newer file.
-                        if filecmp.cmp(sourcedir+name,destdir+destfilename) == False:
-                            print ('File already existst, updating file: %s' %name)
-                            shutil.copy(sourcedir+name,destdir+destfilename) 
-                            pass
+                ## Detect the resolution ##
+                resolutionTestPath = serv+project+sequences+shotdir[x][0]+fslash+shotdir[x][1]+fslash+Comp+publish+elements+elementtest+fslash+v+ext
+                if os.path.exists(resolutionTestPath):
+                    resolution = os.listdir(resolutionTestPath)
+                    print 'debug2'
+                    print resolution
+                    print 'end debug2'
+                    resolution = str(resolution[0]) + fslash
+                    print resolution
 
+
+
+
+
+
+                            #print shotdir[x][0],shotdir[x][1]        
+                        ## folder to look for published shots
+
+                    print "DEBUG"
+                    print ext
+                    print elementtest
+                    print v
+                    print resolution
+                    print "End of debug"
+                    sourcedir = serv+project+sequences+shotdir[x][0]+fslash+shotdir[x][1]+fslash+Comp+publish+elements+elementtest+fslash+v+ext+resolution
+                    # walkdir = sourcedir = serv+project+sequences+shotdir[x][0]+fslash+shotdir[x][1]+fslash+Comp+publish+elements+elementtest+fslash+ext+resolution
+                    walkdir = sourcedir
+                    destdir = serv+project+editorial+nulversie+null+ext+shotdir[x][0]+fslash+shotdir[x][1]+fslash
+                    print 'sourcedir:'+sourcedir
+                    print 'destdir:'+ destdir            
+                    
+
+                    for root, dirs, files in os.walk(walkdir, topdown=False):
+                        for name in files:
+                            print name
+                            if not os.path.exists(destdir):
+                                os.makedirs(destdir)
+                                print 'destdir does not exist, creating destination folder'
+                            ## Create the new file name for the nullversion file
+                            destfilename = shotdir[x][1] + name[(len(name)-9):len(name)]
+                            destfilename = destfilename.replace("_","")
+                            #destfilename = name.replace("%s" %vtest , "v000")
+                            destdir = destdir.replace("%s" %vtest , "v000")
+                            ## check if there is a nullfile
+                            print name 
+                            print destfilename
+                            if os.path.exists(destdir+destfilename) == False:
+                                print ('No file Exists, creating file: %s' %name)
+                                #shutil.copy(sourcedir+name,destdir+destfilename) 
+                                pass
+                            else:
+                                ## Check if the file is the same, if not, copy the newer file.
+                                if filecmp.cmp(sourcedir+name,destdir+destfilename) == False:
+                                    print ('File already existst, updating file: %s' %name)
+                                    #shutil.copy(sourcedir+name,destdir+destfilename) 
+                                    pass
+                pass
+            pass
 
                       
 
@@ -294,11 +322,12 @@ def Null(project,resolution):
         #destfilename=
 
 
+   
 
     pass
 
 
-#TestScript
-#project = "Infinity"
-#resolution = "/1920x1080/"
-#Null(project,resolution)
+# #TestScript
+# project = "PipelineDev"
+# resolution = "/1920x1080/"
+# Null(project,resolution)
