@@ -77,6 +77,9 @@ def Null(project,resolution):
 
 
     projectname = project
+    if project == "Eigen":
+        project = "eigen"
+        pass
     project = project + "/"
     print project
 
@@ -224,6 +227,7 @@ def Null(project,resolution):
             for item in extlist:
                 ext = item
                 print 'checking for ' + ext
+                print ""
 
 
                 ## Change the resolution variable 
@@ -232,11 +236,9 @@ def Null(project,resolution):
                 resolutionTestPath = serv+project+sequences+shotdir[x][0]+fslash+shotdir[x][1]+fslash+Comp+publish+elements+elementtest+fslash+v+ext
                 if os.path.exists(resolutionTestPath):
                     resolution = os.listdir(resolutionTestPath)
-                    print 'debug2'
-                    print resolution
-                    print 'end debug2'
+
                     resolution = str(resolution[0]) + fslash
-                    print resolution
+
 
 
 
@@ -246,44 +248,56 @@ def Null(project,resolution):
                             #print shotdir[x][0],shotdir[x][1]        
                         ## folder to look for published shots
 
-                    print "DEBUG"
-                    print ext
-                    print elementtest
-                    print v
-                    print resolution
-                    print "End of debug"
+
                     sourcedir = serv+project+sequences+shotdir[x][0]+fslash+shotdir[x][1]+fslash+Comp+publish+elements+elementtest+fslash+v+ext+resolution
                     # walkdir = sourcedir = serv+project+sequences+shotdir[x][0]+fslash+shotdir[x][1]+fslash+Comp+publish+elements+elementtest+fslash+ext+resolution
                     walkdir = sourcedir
                     destdir = serv+project+editorial+nulversie+null+ext+shotdir[x][0]+fslash+shotdir[x][1]+fslash
+                    print ""
                     print 'sourcedir:'+sourcedir
                     print 'destdir:'+ destdir            
-                    
+                    print ""
 
                     for root, dirs, files in os.walk(walkdir, topdown=False):
                         for name in files:
-                            print name
+                            
                             if not os.path.exists(destdir):
                                 os.makedirs(destdir)
                                 print 'destdir does not exist, creating destination folder'
                             ## Create the new file name for the nullversion file
-                            destfilename = shotdir[x][1] + name[(len(name)-9):len(name)]
+
+                            ## Change the extension
+                            if ext == 'jpeg/':
+                                destfilename = shotdir[x][1] + name[(len(name)-10):len(name)]
+                                pass
+                            if ext == 'dpx/':
+                                destfilename = shotdir[x][1] + name[(len(name)-9):len(name)]
+                                pass
                             destfilename = destfilename.replace("_","")
                             #destfilename = name.replace("%s" %vtest , "v000")
                             destdir = destdir.replace("%s" %vtest , "v000")
                             ## check if there is a nullfile
-                            print name 
-                            print destfilename
+                            print 'Checking frame :' + name
+                            
                             if os.path.exists(destdir+destfilename) == False:
-                                print ('No file Exists, creating file: %s' %name)
-                                #shutil.copy(sourcedir+name,destdir+destfilename) 
+                                print ('No file Exists, creating file: %s' %destfilename)
+                                
+                                shutil.copy(sourcedir+name,destdir+destfilename) 
                                 pass
                             else:
                                 ## Check if the file is the same, if not, copy the newer file.
+
+
                                 if filecmp.cmp(sourcedir+name,destdir+destfilename) == False:
-                                    print ('File already existst, updating file: %s' %name)
-                                    #shutil.copy(sourcedir+name,destdir+destfilename) 
+                                    print ('File already existst, updating file: %s' %destfilename)
+                                    
+                                    shutil.copy(sourcedir+name,destdir+destfilename) 
                                     pass
+                                else:
+                                    print 'Frame is synced'
+                                    print destfilename
+                            print ""
+
                 pass
             pass
 
@@ -331,3 +345,14 @@ def Null(project,resolution):
 # project = "PipelineDev"
 # resolution = "/1920x1080/"
 # Null(project,resolution)
+
+###########
+#Autorun
+##########
+Infinity()
+Eigen()
+#PipelineDev()
+#DarkMachine()
+#Mechanic()
+#Kropsdam()
+#Trouble()

@@ -1,0 +1,25 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE hieroXML>
+<hieroXML version="10" revision="Unknown" release="v5" name="NukeStudio">
+ <Project guid="{d2b28ca9-ceff-5c4a-82bd-d1fb7dc61ace}" floatLut="linear" logLut="Cineon" name="pipeline_controlcenter" timedisplayformat="0" starttimecode="90000" shotPresetName="Basic Nuke Shot With Annotations" redVideoDecodeMode="0" sixteenBitLut="sRGB" nukeUseOCIO="0" samplerate="48000/1" framerate="25/1" viewerLut="sRGB" thumbnailLut="sRGB" buildTrackName="VFX" ocioconfigpath="" editable="1" eightBitLut="sRGB">
+  <items>
+   <RootBinProjectItem editable="1" guid="{44e89fea-7b33-c54b-8dca-93eccd828489}" name="Sequences">
+    <BinViewType>2</BinViewType>
+    <BinViewZoom>70</BinViewZoom>
+    <AllowedItems>13</AllowedItems>
+   </RootBinProjectItem>
+   <RootBinProjectItem editable="1" guid="{4f432b12-e9c4-8f40-b86a-2b8a609b1d73}" name="Tags">
+    <BinViewType>2</BinViewType>
+    <BinViewZoom>70</BinViewZoom>
+    <AllowedItems>17</AllowedItems>
+   </RootBinProjectItem>
+  </items>
+  <BinViewType>2</BinViewType>
+  <BinViewZoom>70</BinViewZoom>
+  <AllowedItems>2</AllowedItems>
+  <RootBinProjectItem objName="sequencesBin" guid="{44e89fea-7b33-c54b-8dca-93eccd828489}" link="internal"/>
+  <RootBinProjectItem objName="tagsBin" guid="{4f432b12-e9c4-8f40-b86a-2b8a609b1d73}" link="internal"/>
+  <MediaFormatValue default="0" objName="outputformat" value="1,[ 0, 0, 1920, 1080],[ 0, 0, 1920, 1080],HD_1080" name=""/>
+ </Project>
+ <UIState/>
+</hieroXML>
