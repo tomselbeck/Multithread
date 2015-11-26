@@ -77,6 +77,9 @@ def Null(project,resolution):
 
 
     projectname = project
+    if project == "Eigen":
+        project = "eigen"
+        pass
     project = project + "/"
     print project
 
@@ -348,7 +351,7 @@ def Null(project,resolution):
 ##########
 Infinity()
 Eigen()
-PipelineDev()
+#PipelineDev()
 #DarkMachine()
 #Mechanic()
 #Kropsdam()

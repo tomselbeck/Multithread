@@ -12,14 +12,20 @@ menubar = nuke.menu("Nuke")
 bar2016 = menubar.addMenu("vfx 2016 :)")
 ## Custom scripts ##
 import T_twtswitch
-import T_AutoExport
+import T_ImportPlate
 
 bar2016.addCommand("TimeWillTell/Switch_to_server", "T_twtswitch.server()")
 bar2016.addCommand("TimeWillTell/Switch_to_local", "T_twtswitch.local()")
 
+## Plate importer 
+bar2016.addCommand("PipelineTools/Import plate/Import Source", "T_ImportPlate.importPlate('source')")
+bar2016.addCommand("PipelineTools/Import plate/Import Undistorted", "T_ImportPlate.importPlate('undistorted')")
+bar2016.addCommand("PipelineTools/Import plate/Import Matte", "T_ImportPlate.importPlate('matte')")
+bar2016.addCommand("PipelineTools/Import plate/Import Clean", "T_ImportPlate.importPlate('clean')")
 #import T_NulversieCreator
 bar2016.addCommand("PipelineTools/Import NulversieExporter", "import T_NulversieCreator")
-bar2016.addCommand("PipelineTools/Auto Export", "T_AutoExport.run()")
+bar2016.addCommand("PipelineTools/Import export timer", "import T_MovExporter")
+bar2016.addCommand("PipelineTools/Start export timer", "T_MovExporter.Schedule")
 bar2016.addCommand("PipelineTools/Update Nulversie/Project: PipelineDev", "T_NulversieCreator.PipelineDev()")
 bar2016.addCommand("PipelineTools/Update Nulversie/Project: Eigen", "T_NulversieCreator.Eigen()")
 bar2016.addCommand("PipelineTools/Update Nulversie/Project: DarkMachine", "T_NulversieCreator.DarkMachine()")
@@ -27,6 +33,9 @@ bar2016.addCommand("PipelineTools/Update Nulversie/Project: Kropsdam", "T_Nulver
 bar2016.addCommand("PipelineTools/Update Nulversie/Project: Infinity", "T_NulversieCreator.Infinity()")
 bar2016.addCommand("PipelineTools/Update Nulversie/Project: Trouble", "T_NulversieCreator.Trouble()")
 bar2016.addCommand("PipelineTools/Update Nulversie/Project: Mechanic", "T_NulversieCreator.Mechanic()")
+
+
+
 
 
 ## Custom Gizmos
